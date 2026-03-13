@@ -3,51 +3,53 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/verified_badge.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
+import '../../../services/chat_service.dart';
 
 class InboxWidget extends StatelessWidget {
   const InboxWidget({super.key});
 
-  // Mock chat history data
-  List<ChatMessage> get _mockMessages => [
-    ChatMessage(
-      id: '1',
-      vendorName: 'Aashna',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: '🙂 Let\'s make you HAPPY!',
-      date: 'Mar 5, 2026',
-      isVerified: true,
-      isUnread: true,
-    ),
-    ChatMessage(
-      id: '2',
-      vendorName: 'Mike Chen',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: 'How can I help you today?',
-      date: 'Mar 4, 2026',
-      isVerified: true,
-      isUnread: false,
-    ),
-    ChatMessage(
-      id: '3',
-      vendorName: 'Emma Davis',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: 'Looking forward to our session',
-      date: 'Mar 3, 2026',
-      isVerified: true,
-      isUnread: false,
-    ),
-  ];
+  // Service instance
+  final ChatService _chatService = ChatService();
 
   @override
   Widget build(BuildContext context) {
-    return ListView.builder(
-      padding: const EdgeInsets.all(16.0),
-      itemCount: _mockMessages.length,
-      itemBuilder: (context, index) {
-        final message = _mockMessages[index];
-        return _ChatMessageTile(
-          message: message,
-          onTap: () => context.go('/chat/${message.id}'),
+    return FutureBuilder<List<InboxChat>>(
+      future: _chatService.getInboxChats(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          );
+        }
+
+        if (snapshot.hasError) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, color: AppColors.error, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Error loading chats',
+                  style: AppTypography.body1.copyWith(color: AppColors.error),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final inboxChats = snapshot.data ?? [];
+
+        return ListView.builder(
+          padding: const EdgeInsets.all(16.0),
+          itemCount: inboxChats.length,
+          itemBuilder: (context, index) {
+            final chat = inboxChats[index];
+            return _ChatMessageTile(
+              chat: chat,
+              onTap: () => context.go('/chat/${chat.vendorId}'),
+            );
+          },
         );
       },
     );
@@ -55,13 +57,10 @@ class InboxWidget extends StatelessWidget {
 }
 
 class _ChatMessageTile extends StatelessWidget {
-  final ChatMessage message;
+  final InboxChat chat;
   final VoidCallback onTap;
 
-  const _ChatMessageTile({
-    required this.message,
-    required this.onTap,
-  });
+  const _ChatMessageTile({required this.chat, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -82,28 +81,30 @@ class _ChatMessageTile extends StatelessWidget {
             // Avatar
             CircleAvatar(
               radius: 28,
-              backgroundImage: AssetImage(message.vendorImage),
+              backgroundImage: AssetImage(chat.vendorImage),
+              backgroundColor: AppColors.card,
             ),
-            
+
             const SizedBox(width: 12),
-            
+
             // Message Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // Vendor Name and Verified Badge
                   Row(
                     children: [
                       Text(
-                        message.vendorName,
+                        chat.vendorName,
                         style: AppTypography.title2.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(width: 8),
                       const VerifiedBadge(size: 10),
-                      if (message.isUnread) ...[
-                        const Spacer(),
+                      if (chat.isUnread) ...[
+                        const SizedBox(width: 8),
                         Container(
                           width: 8,
                           height: 8,
@@ -115,21 +116,42 @@ class _ChatMessageTile extends StatelessWidget {
                       ],
                     ],
                   ),
+
                   const SizedBox(height: 4),
+
+                  // Last Message
                   Text(
-                    message.lastMessage,
+                    chat.lastMessage,
                     style: AppTypography.body2.copyWith(
                       color: AppColors.textSecondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
+
                   const SizedBox(height: 4),
-                  Text(
-                    message.date,
-                    style: AppTypography.caption1.copyWith(
-                      color: AppColors.textTertiary,
-                    ),
+
+                  // Date and Unread Indicator
+                  Row(
+                    children: [
+                      Text(
+                        chat.date,
+                        style: AppTypography.caption1.copyWith(
+                          color: AppColors.textTertiary,
+                        ),
+                      ),
+                      if (chat.isUnread) ...[
+                        const SizedBox(width: 8),
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                 ],
               ),
@@ -141,8 +163,9 @@ class _ChatMessageTile extends StatelessWidget {
   }
 }
 
-class ChatMessage {
+class InboxChat {
   final String id;
+  final String vendorId;
   final String vendorName;
   final String vendorImage;
   final String lastMessage;
@@ -150,8 +173,9 @@ class ChatMessage {
   final bool isVerified;
   final bool isUnread;
 
-  ChatMessage({
+  InboxChat({
     required this.id,
+    required this.vendorId,
     required this.vendorName,
     required this.vendorImage,
     required this.lastMessage,

@@ -4,7 +4,7 @@ import '../../../shared/widgets/verified_badge.dart';
 import '../../../shared/widgets/online_indicator.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
-import '../home/vendor_model.dart';
+import '../../../models/vendor_model.dart';
 
 class VendorDetailScreen extends StatelessWidget {
   const VendorDetailScreen({super.key});
@@ -13,16 +13,17 @@ class VendorDetailScreen extends StatelessWidget {
   Vendor get _mockVendor => Vendor(
     id: '1',
     name: 'Aashna',
-    image: 'assets/profile1.png',
+    profileImage: 'assets/profile1.png',
     ratePerMinute: 5,
     isOnline: true,
     gender: 'F',
     age: 25,
     rating: 4.82,
-    reviewCount: 3000,
-    experienceHours: 1000,
+    totalReviews: 3000,
     description:
         'Professional counselor with 5+ years experience in career guidance and personal development.',
+    experienceHours: 1000,
+    verified: true,
   );
 
   @override
@@ -33,10 +34,7 @@ class VendorDetailScreen extends StatelessWidget {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.background,
-              AppColors.surface,
-            ],
+            colors: [AppColors.background, AppColors.surface],
           ),
         ),
         child: SafeArea(
@@ -55,10 +53,7 @@ class VendorDetailScreen extends StatelessWidget {
                       ),
                     ),
                     const Spacer(),
-                    Text(
-                      'Vendor Profile',
-                      style: AppTypography.headline3,
-                    ),
+                    Text('Vendor Profile', style: AppTypography.headline3),
                     const Spacer(),
                   ],
                 ),
@@ -80,7 +75,9 @@ class VendorDetailScreen extends StatelessWidget {
                             children: [
                               CircleAvatar(
                                 radius: 76,
-                                backgroundImage: AssetImage(_mockVendor.image),
+                                backgroundImage: AssetImage(
+                                  _mockVendor.profileImage,
+                                ),
                                 backgroundColor: AppColors.card,
                               ),
                               OnlineIndicator(
@@ -165,7 +162,9 @@ class VendorDetailScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Column(
@@ -199,7 +198,9 @@ class VendorDetailScreen extends StatelessWidget {
                           color: Theme.of(context).colorScheme.surface,
                           borderRadius: BorderRadius.circular(16),
                           border: Border.all(
-                            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.outline.withValues(alpha: 0.2),
                           ),
                         ),
                         child: Column(
@@ -224,24 +225,30 @@ class VendorDetailScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(28),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.primary.withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.3,
+                                          ),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
                                     child: ElevatedButton(
-                                      onPressed: () => context.go('/chat/${_mockVendor.id}'),
+                                      onPressed: () =>
+                                          context.go('/chat/${_mockVendor.id}'),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         padding: EdgeInsets.zero,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(28),
+                                          borderRadius: BorderRadius.circular(
+                                            28,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.chat_outlined,
@@ -251,11 +258,12 @@ class VendorDetailScreen extends StatelessWidget {
                                           const SizedBox(width: 8),
                                           Text(
                                             'CHAT NOW',
-                                            style: AppTypography.buttonMedium.copyWith(
-                                              color: AppColors.textInverse,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 1.0,
-                                            ),
+                                            style: AppTypography.buttonMedium
+                                                .copyWith(
+                                                  color: AppColors.textInverse,
+                                                  fontWeight: FontWeight.w700,
+                                                  letterSpacing: 1.0,
+                                                ),
                                           ),
                                         ],
                                       ),
@@ -273,24 +281,30 @@ class VendorDetailScreen extends StatelessWidget {
                                       borderRadius: BorderRadius.circular(28),
                                       boxShadow: [
                                         BoxShadow(
-                                          color: AppColors.primary.withValues(alpha: 0.3),
+                                          color: AppColors.primary.withValues(
+                                            alpha: 0.3,
+                                          ),
                                           blurRadius: 12,
                                           offset: const Offset(0, 4),
                                         ),
                                       ],
                                     ),
                                     child: ElevatedButton(
-                                      onPressed: () => context.go('/call/${_mockVendor.id}'),
+                                      onPressed: () =>
+                                          context.go('/call/${_mockVendor.id}'),
                                       style: ElevatedButton.styleFrom(
                                         backgroundColor: Colors.transparent,
                                         shadowColor: Colors.transparent,
                                         padding: EdgeInsets.zero,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(28),
+                                          borderRadius: BorderRadius.circular(
+                                            28,
+                                          ),
                                         ),
                                       ),
                                       child: Row(
-                                        mainAxisAlignment: MainAxisAlignment.center,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.center,
                                         children: [
                                           Icon(
                                             Icons.call_outlined,
@@ -300,11 +314,12 @@ class VendorDetailScreen extends StatelessWidget {
                                           const SizedBox(width: 8),
                                           Text(
                                             'CALL NOW',
-                                            style: AppTypography.buttonMedium.copyWith(
-                                              color: AppColors.textInverse,
-                                              fontWeight: FontWeight.w700,
-                                              letterSpacing: 1.0,
-                                            ),
+                                            style: AppTypography.buttonMedium
+                                                .copyWith(
+                                                  color: AppColors.textInverse,
+                                                  fontWeight: FontWeight.w700,
+                                                  letterSpacing: 1.0,
+                                                ),
                                           ),
                                         ],
                                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../features/home/vendor_model.dart';
+import '../../../models/vendor_model.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 import 'verified_badge.dart';
@@ -47,7 +47,8 @@ class EnhancedVendorCard extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 32,
-                      backgroundImage: AssetImage(vendor.image),
+                      backgroundImage: AssetImage(vendor.profileImage),
+                      backgroundColor: AppColors.card,
                     ),
                     OnlineIndicator(isOnline: vendor.isOnline, size: 12),
                   ],

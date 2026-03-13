@@ -33,10 +33,7 @@ class AppDrawer extends StatelessWidget {
                   backgroundColor: AppColors.card,
                 ),
                 const SizedBox(height: 12),
-                Text(
-                  'Anonymous',
-                  style: AppTypography.title1,
-                ),
+                Text('Anonymous', style: AppTypography.title1),
                 const SizedBox(height: 4),
                 Text(
                   '+91 98765 43210',
@@ -47,7 +44,7 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // Menu Items
           Expanded(
             child: ListView(
@@ -57,7 +54,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.person_outline,
                   title: 'My Profile',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     context.go('/profile');
                   },
                 ),
@@ -65,7 +64,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.star_outline,
                   title: 'Only for you',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Coming soon')),
                     );
@@ -75,7 +76,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.share_outlined,
                   title: 'Refer and Earn',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     context.go('/refer');
                   },
                 ),
@@ -83,7 +86,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.chat_outlined,
                   title: 'Communicate',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Coming soon')),
                     );
@@ -93,7 +98,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.support_agent_outlined,
                   title: 'User Care',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     context.go('/user-care');
                   },
                 ),
@@ -101,7 +108,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.settings_outlined,
                   title: 'Settings',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     context.go('/settings');
                   },
                 ),
@@ -109,7 +118,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.delete_outline,
                   title: 'Delete Account',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Coming soon')),
                     );
@@ -119,7 +130,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.history_outlined,
                   title: 'Usage',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     context.go('/usage');
                   },
                 ),
@@ -127,7 +140,9 @@ class AppDrawer extends StatelessWidget {
                   icon: Icons.logout_outlined,
                   title: 'Logout',
                   onTap: () {
-                    Navigator.pop(context);
+                    if (Navigator.canPop(context)) {
+                      Navigator.pop(context);
+                    }
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Coming soon')),
                     );
@@ -136,7 +151,7 @@ class AppDrawer extends StatelessWidget {
               ],
             ),
           ),
-          
+
           // App Version
           Container(
             padding: const EdgeInsets.all(24.0),
@@ -178,16 +193,10 @@ class _DrawerMenuItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListTile(
-      leading: Icon(
-        icon,
-        color: AppColors.textSecondary,
-        size: 24,
-      ),
+      leading: Icon(icon, color: AppColors.textSecondary, size: 24),
       title: Text(
         title,
-        style: AppTypography.body1.copyWith(
-          color: AppColors.textPrimary,
-        ),
+        style: AppTypography.body1.copyWith(color: AppColors.textPrimary),
       ),
       onTap: onTap,
       contentPadding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
