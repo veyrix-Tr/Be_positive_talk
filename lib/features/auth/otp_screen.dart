@@ -53,7 +53,7 @@ class _OTPScreenState extends State<OTPScreen> {
           setState(() {
             _isLoading = false;
           });
-          context.go('/profile');
+          context.go('/profile-setup');
         }
       });
     }
@@ -86,7 +86,7 @@ class _OTPScreenState extends State<OTPScreen> {
                       Align(
                         alignment: Alignment.centerLeft,
                         child: IconButton(
-                          onPressed: () => Navigator.of(context).pop(),
+                          onPressed: () => context.go('/login'),
                           icon: const Icon(
                             Icons.arrow_back_ios_rounded,
                             color: AppColors.textPrimary,

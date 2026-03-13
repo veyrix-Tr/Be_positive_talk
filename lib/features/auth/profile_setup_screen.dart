@@ -69,7 +69,7 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
                         Align(
                           alignment: Alignment.centerLeft,
                           child: IconButton(
-                            onPressed: () => Navigator.of(context).pop(),
+                            onPressed: () => context.go('/home'),
                             icon: const Icon(
                               Icons.arrow_back_ios_rounded,
                               color: AppColors.textPrimary,

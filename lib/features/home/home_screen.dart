@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/widgets/token_badge.dart';
-import '../../../shared/widgets/host_card.dart';
+import '../../../shared/widgets/enhanced_vendor_card.dart';
+import '../../../shared/widgets/wallet_badge.dart';
+import '../../../shared/widgets/app_drawer.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 import '../../../services/token_service.dart';
 import 'vendor_model.dart';
+import 'inbox_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,17 +16,21 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen>
+    with SingleTickerProviderStateMixin {
   final TokenService _tokenService = TokenService();
+  late TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _tokenService.addListener(_onTokenServiceChanged);
   }
 
   @override
   void dispose() {
+    _tabController.dispose();
     _tokenService.removeListener(_onTokenServiceChanged);
     super.dispose();
   }
@@ -39,11 +45,16 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Vendor> get _mockVendors => [
     Vendor(
       id: '1',
-      name: 'Sarah Johnson',
+      name: 'Aashna',
       image: 'assets/profile1.png',
       ratePerMinute: 5,
       isOnline: true,
       description: 'Professional counselor with 5+ years experience',
+      gender: 'F',
+      age: 25,
+      rating: 4.82,
+      reviewCount: 3000,
+      experienceHours: 1000,
     ),
     Vendor(
       id: '2',
@@ -52,6 +63,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ratePerMinute: 8,
       isOnline: true,
       description: 'Tech support specialist',
+      gender: 'M',
+      age: 30,
+      rating: 4.5,
+      reviewCount: 2500,
+      experienceHours: 1500,
     ),
     Vendor(
       id: '3',
@@ -60,6 +76,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ratePerMinute: 6,
       isOnline: false,
       description: 'Life coach and mentor',
+      gender: 'F',
+      age: 28,
+      rating: 4.9,
+      reviewCount: 1800,
+      experienceHours: 800,
     ),
     Vendor(
       id: '4',
@@ -68,6 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ratePerMinute: 10,
       isOnline: true,
       description: 'Business consultant',
+      gender: 'M',
+      age: 35,
+      rating: 4.7,
+      reviewCount: 4200,
+      experienceHours: 2000,
     ),
     Vendor(
       id: '5',
@@ -76,12 +102,19 @@ class _HomeScreenState extends State<HomeScreen> {
       ratePerMinute: 7,
       isOnline: false,
       description: 'Career advisor and coach',
+      gender: 'F',
+      age: 32,
+      rating: 4.6,
+      reviewCount: 3100,
+      experienceHours: 1200,
     ),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppColors.background,
+      drawer: const AppDrawer(),
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -93,187 +126,68 @@ class _HomeScreenState extends State<HomeScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              // Modern Header
-              Padding(
-                padding: const EdgeInsets.all(24.0),
-                child: Column(
+              // Header with Wallet Badge
+              Container(
+                padding: const EdgeInsets.all(16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Top bar with greeting and profile
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        // Greeting
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Good morning',
-                              style: AppTypography.body2.copyWith(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              'Welcome back!',
-                              style: AppTypography.headline3,
-                            ),
-                          ],
+                    Builder(
+                      builder: (context) => IconButton(
+                        onPressed: () => Scaffold.of(context).openDrawer(),
+                        icon: const Icon(
+                          Icons.menu,
+                          color: AppColors.textPrimary,
                         ),
-
-                        // Profile button
-                        Container(
-                          width: 48,
-                          height: 48,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: AppColors.primaryGradient,
-                            ),
-                            borderRadius: BorderRadius.circular(24),
-                            boxShadow: [
-                              BoxShadow(
-                                color: AppColors.primary.withValues(alpha: 0.2),
-                                blurRadius: 12,
-                                offset: const Offset(0, 4),
-                              ),
-                            ],
-                          ),
-                          child: IconButton(
-                            onPressed: () {
-                              // TODO: Navigate to profile
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                  content: Text('Profile coming soon'),
-                                ),
-                              );
-                            },
-                            icon: const Icon(
-                              Icons.person_rounded,
-                              size: 24,
-                              color: AppColors.textInverse,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 32),
-
-                    // Token Balance Card
-                    Container(
-                      width: double.infinity,
-                      padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: AppColors.primaryGradient,
-                        ),
-                        borderRadius: BorderRadius.circular(20),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 8),
-                          ),
-                        ],
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Your Balance',
-                                style: AppTypography.body2.copyWith(
-                                  color: AppColors.textInverse.withValues(
-                                    alpha: 0.8,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                onPressed: () {
-                                  context.go('/wallet');
-                                },
-                                icon: const Icon(
-                                  Icons.add_circle_outline,
-                                  color: AppColors.textInverse,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 12),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.end,
-                            children: [
-                              TokenBadge(tokenCount: _tokenService.tokens),
-                              const SizedBox(width: 8),
-                              Text(
-                                'tokens',
-                                style: AppTypography.body2.copyWith(
-                                  color: AppColors.textInverse.withValues(
-                                    alpha: 0.8,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
                       ),
                     ),
+                    Text('Welcome back!', style: AppTypography.headline3),
+                    WalletBadge(amount: _tokenService.tokens.toDouble()),
                   ],
                 ),
               ),
 
-              // Vendor List Section
+              // Tab Bar
+              Container(
+                margin: const EdgeInsets.symmetric(horizontal: 16.0),
+                decoration: BoxDecoration(
+                  color: AppColors.surface.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: TabBar(
+                  controller: _tabController,
+                  tabs: const [
+                    Tab(text: 'Verified'),
+                    Tab(text: 'Inbox'),
+                  ],
+                  labelStyle: AppTypography.title3,
+                  indicator: UnderlineTabIndicator(
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                    insets: const EdgeInsets.symmetric(horizontal: 16),
+                  ),
+                ),
+              ),
+
+              // Tab Content
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: TabBarView(
+                  controller: _tabController,
                   children: [
-                    // Section Header
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text(
-                            'Available Experts',
-                            style: AppTypography.headline3,
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              // TODO: Show all vendors
-                            },
-                            child: Text(
-                              'See all',
-                              style: AppTypography.buttonMedium.copyWith(
-                                color: AppColors.primary,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
+                    // Verified Tab - Vendor List
+                    ListView.builder(
+                      padding: const EdgeInsets.all(16.0),
+                      itemCount: _mockVendors.length,
+                      itemBuilder: (context, index) {
+                        final vendor = _mockVendors[index];
+                        return EnhancedVendorCard(
+                          vendor: vendor,
+                          onTap: () => context.go('/vendor/${vendor.id}'),
+                        );
+                      },
                     ),
 
-                    const SizedBox(height: 16),
-
-                    // Vendor List
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(horizontal: 24.0),
-                        itemCount: _mockVendors.length,
-                        itemBuilder: (context, index) {
-                          final vendor = _mockVendors[index];
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 16.0),
-                            child: HostCard(
-                              vendor: vendor,
-                              onTap: () {
-                                context.go('/vendor');
-                              },
-                            ),
-                          );
-                        },
-                      ),
-                    ),
+                    // Inbox Tab - Chat History
+                    const InboxWidget(),
                   ],
                 ),
               ),

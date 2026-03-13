@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 
@@ -144,7 +145,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.go('/home'),
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,
                           color: AppColors.textPrimary,

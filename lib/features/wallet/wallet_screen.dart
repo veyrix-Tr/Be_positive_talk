@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/token_badge.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
@@ -70,10 +71,7 @@ class _WalletScreenState extends State<WalletScreen> {
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              AppColors.background,
-              AppColors.surface,
-            ],
+            colors: [AppColors.background, AppColors.surface],
           ),
         ),
         child: SafeArea(
@@ -100,7 +98,7 @@ class _WalletScreenState extends State<WalletScreen> {
                         ],
                       ),
                       child: IconButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () => context.go('/home'),
                         icon: const Icon(
                           Icons.arrow_back_ios_rounded,
                           color: AppColors.textPrimary,
@@ -108,9 +106,9 @@ class _WalletScreenState extends State<WalletScreen> {
                         ),
                       ),
                     ),
-                    
+
                     const Spacer(),
-                    
+
                     // History Button
                     Container(
                       width: 48,
@@ -144,7 +142,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   ],
                 ),
               ),
-              
+
               // Wallet Content
               Expanded(
                 child: SingleChildScrollView(
@@ -174,21 +172,23 @@ class _WalletScreenState extends State<WalletScreen> {
                             Text(
                               'Current Balance',
                               style: AppTypography.body2.copyWith(
-                                color: AppColors.textInverse.withValues(alpha: 0.8),
+                                color: AppColors.textInverse.withValues(
+                                  alpha: 0.8,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 16),
                             Row(
                               crossAxisAlignment: CrossAxisAlignment.end,
                               children: [
-                                TokenBadge(
-                                  tokenCount: _tokenService.tokens,
-                                ),
+                                TokenBadge(tokenCount: _tokenService.tokens),
                                 const SizedBox(width: 12),
                                 Text(
                                   'tokens',
                                   style: AppTypography.body1.copyWith(
-                                    color: AppColors.textInverse.withValues(alpha: 0.8),
+                                    color: AppColors.textInverse.withValues(
+                                      alpha: 0.8,
+                                    ),
                                   ),
                                 ),
                               ],
@@ -200,7 +200,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.textInverse.withValues(alpha: 0.2),
+                                color: AppColors.textInverse.withValues(
+                                  alpha: 0.2,
+                                ),
                                 borderRadius: BorderRadius.circular(20),
                               ),
                               child: Text(
@@ -213,9 +215,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           ],
                         ),
                       ),
-                      
+
                       const SizedBox(height: 40),
-                      
+
                       // Section Header
                       Align(
                         alignment: Alignment.centerLeft,
@@ -224,9 +226,9 @@ class _WalletScreenState extends State<WalletScreen> {
                           style: AppTypography.headline3,
                         ),
                       ),
-                      
+
                       const SizedBox(height: 8),
-                      
+
                       Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -236,24 +238,25 @@ class _WalletScreenState extends State<WalletScreen> {
                           ),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Token Plans Grid
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 16,
-                          mainAxisSpacing: 16,
-                          childAspectRatio: 0.8,
-                        ),
+                        gridDelegate:
+                            const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 2,
+                              crossAxisSpacing: 16,
+                              mainAxisSpacing: 16,
+                              childAspectRatio: 0.8,
+                            ),
                         itemCount: _tokenPlans.length,
                         itemBuilder: (context, index) {
                           final plan = _tokenPlans[index];
                           final isPopular = plan.popularBadge != null;
-                          
+
                           return Container(
                             decoration: BoxDecoration(
                               gradient: isPopular
@@ -286,7 +289,8 @@ class _WalletScreenState extends State<WalletScreen> {
                                 Padding(
                                   padding: const EdgeInsets.all(20),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       // Popular Badge
                                       if (isPopular)
@@ -296,20 +300,24 @@ class _WalletScreenState extends State<WalletScreen> {
                                             vertical: 4,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: AppColors.textInverse.withValues(alpha: 0.2),
-                                            borderRadius: BorderRadius.circular(12),
+                                            color: AppColors.textInverse
+                                                .withValues(alpha: 0.2),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
                                           ),
                                           child: Text(
                                             plan.popularBadge!,
-                                            style: AppTypography.caption1.copyWith(
-                                              color: AppColors.textInverse,
-                                              fontWeight: FontWeight.w600,
-                                            ),
+                                            style: AppTypography.caption1
+                                                .copyWith(
+                                                  color: AppColors.textInverse,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
                                           ),
                                         ),
-                                      
+
                                       if (isPopular) const SizedBox(height: 12),
-                                      
+
                                       // Token Amount
                                       Text(
                                         '${plan.tokens}',
@@ -319,20 +327,21 @@ class _WalletScreenState extends State<WalletScreen> {
                                               : AppColors.textPrimary,
                                         ),
                                       ),
-                                      
+
                                       const SizedBox(height: 4),
-                                      
+
                                       Text(
                                         'tokens',
                                         style: AppTypography.body2.copyWith(
                                           color: isPopular
-                                              ? AppColors.textInverse.withValues(alpha: 0.8)
+                                              ? AppColors.textInverse
+                                                    .withValues(alpha: 0.8)
                                               : AppColors.textSecondary,
                                         ),
                                       ),
-                                      
+
                                       const Spacer(),
-                                      
+
                                       // Price
                                       Text(
                                         '\$${plan.price}',
@@ -342,9 +351,9 @@ class _WalletScreenState extends State<WalletScreen> {
                                               : AppColors.primary,
                                         ),
                                       ),
-                                      
+
                                       const SizedBox(height: 8),
-                                      
+
                                       // Buy Button
                                       Container(
                                         width: double.infinity,
@@ -353,21 +362,28 @@ class _WalletScreenState extends State<WalletScreen> {
                                           color: isPopular
                                               ? AppColors.textInverse
                                               : AppColors.primary,
-                                          borderRadius: BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(
+                                            12,
+                                          ),
                                         ),
                                         child: Material(
                                           color: Colors.transparent,
                                           child: InkWell(
-                                            borderRadius: BorderRadius.circular(12),
-                                            onTap: () => _addTokens(plan.tokens),
+                                            borderRadius: BorderRadius.circular(
+                                              12,
+                                            ),
+                                            onTap: () =>
+                                                _addTokens(plan.tokens),
                                             child: Center(
                                               child: Text(
                                                 'Buy Now',
-                                                style: AppTypography.buttonSmall.copyWith(
-                                                  color: isPopular
-                                                      ? AppColors.primary
-                                                      : AppColors.textInverse,
-                                                ),
+                                                style: AppTypography.buttonSmall
+                                                    .copyWith(
+                                                      color: isPopular
+                                                          ? AppColors.primary
+                                                          : AppColors
+                                                                .textInverse,
+                                                    ),
                                               ),
                                             ),
                                           ),
@@ -381,7 +397,7 @@ class _WalletScreenState extends State<WalletScreen> {
                           );
                         },
                       ),
-                      
+
                       const SizedBox(height: 32),
                     ],
                   ),
