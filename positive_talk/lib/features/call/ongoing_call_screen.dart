@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/typography.dart';
 import '../../../services/token_service.dart';
+import '../../../shared/models/call_session_data.dart';
+import '../../../models/call_session_model.dart';
 
 class OngoingCallScreen extends StatefulWidget {
   const OngoingCallScreen({super.key});
@@ -63,8 +65,15 @@ class _OngoingCallScreenState extends State<OngoingCallScreen> {
 
               Text(
                 CallSessionData(
-                  duration: _tokenService.callDuration,
+                  sessionId: 'mock_session_1',
+                  vendorId: '1',
+                  vendorName: 'Aashna',
+                  startTime: DateTime.now().subtract(
+                    _tokenService.callDuration,
+                  ),
                   tokensUsed: _tokenService.tokensUsed,
+                  status: CallStatus.ongoing,
+                  duration: _tokenService.callDuration,
                   remainingTokens: _tokenService.tokens,
                 ).formattedDuration,
                 style: AppTypography.headline3.copyWith(

@@ -1,4 +1,3 @@
-import 'dart:async';
 import '../models/user_model.dart';
 
 class AuthService {
@@ -6,64 +5,56 @@ class AuthService {
   factory AuthService() => _instance;
   AuthService._internal();
 
-  // Mock current user
   User? _currentUser;
 
-  Future<User> loginWithPhone(String phoneNumber) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(seconds: 1));
-    
-    // Mock user data
-    final mockUser = User(
-      id: 'user_123',
-      name: 'John Doe',
-      phoneNumber: phoneNumber,
-      profileImage: 'assets/profile1.png',
-      referralCode: 'JOHN123',
-      tokenBalance: 100,
-      createdAt: DateTime.now(),
-    );
+  // Mock user data
+  final User _mockUser = User(
+    id: '1',
+    name: 'John Doe',
+    phoneNumber: '+1234567890',
+    profileImage: 'assets/profile1.png',
+    referralCode: 'JOHN2024',
+    tokenBalance: 150,
+    createdAt: DateTime.now().subtract(const Duration(days: 30)),
+  );
 
-    _currentUser = mockUser;
-    return mockUser;
+  // Login with phone number
+  Future<void> loginWithPhone(String phoneNumber) async {
+    // Simulate network delay
+    await Future.delayed(const Duration(seconds: 1));
+
+    // Mock successful login
+    _currentUser = _mockUser;
   }
 
+  // Verify OTP
   Future<bool> verifyOTP(String otp) async {
-    // Simulate API call delay
+    // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
-    
-    // Mock OTP verification - always succeeds for demo
-    return otp == '123456';
+
+    // Mock OTP verification - accept any 6 digit code
+    if (otp.length == 6 && int.tryParse(otp) != null) {
+      return true;
+    }
+    return false;
   }
 
+  // Logout
   Future<void> logout() async {
-    // Simulate API call delay
+    // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
-    
+
     _currentUser = null;
   }
 
-  User? getCurrentUser() {
+  // Get current user
+  Future<User?> getCurrentUser() async {
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 200));
+
     return _currentUser;
   }
 
-  Future<User> refreshCurrentUser() async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 500));
-    
-    if (_currentUser != null) {
-      // Return updated mock user
-      _currentUser = User(
-        id: _currentUser!.id,
-        name: _currentUser!.name,
-        phoneNumber: _currentUser!.phoneNumber,
-        profileImage: _currentUser!.profileImage,
-        referralCode: _currentUser!.referralCode,
-        tokenBalance: _currentUser!.tokenBalance + 10, // Mock bonus
-        createdAt: _currentUser!.createdAt,
-      );
-    }
-    
-    return _currentUser!;
-  }
+  // Check if user is authenticated
+  bool get isAuthenticated => _currentUser != null;
 }

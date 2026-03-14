@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../../shared/widgets/token_badge.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 import '../../../services/wallet_service.dart';
-import '../../../services/token_service.dart';
 import '../../../models/transaction_model.dart';
 
 class WalletScreen extends StatefulWidget {
@@ -17,7 +15,7 @@ class WalletScreen extends StatefulWidget {
 class _WalletScreenState extends State<WalletScreen> {
   // Service instance
   final WalletService _walletService = WalletService();
-  
+
   // State for balance and transactions
   int _currentBalance = 0;
   List<Transaction> _transactions = [];
@@ -87,10 +85,7 @@ class _WalletScreenState extends State<WalletScreen> {
           ),
           padding: EdgeInsets.zero,
         ),
-        title: Text(
-          'My Wallet',
-          style: AppTypography.headline3,
-        ),
+        title: Text('My Wallet', style: AppTypography.headline3),
         centerTitle: true,
       ),
       body: Column(
@@ -134,7 +129,7 @@ class _WalletScreenState extends State<WalletScreen> {
                             ),
                             child: const CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AppColors.primary,
+                              color: AppColors.primary,
                             ),
                           )
                         : Text(
@@ -148,7 +143,6 @@ class _WalletScreenState extends State<WalletScreen> {
                 ),
               ],
             ),
-          ],
           ),
 
           // Token Plans Section
@@ -166,7 +160,7 @@ class _WalletScreenState extends State<WalletScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 // Plans Grid
                 FutureBuilder<Map<String, dynamic>>(
                   future: _walletService.getTokenPackages(),
@@ -179,24 +173,28 @@ class _WalletScreenState extends State<WalletScreen> {
                       );
                     }
                     if (snapshot.hasError) {
-                      return const Center(
+                      return Center(
                         child: Text(
                           'Error loading token packages',
-                          style: AppTypography.body1.copyWith(color: AppColors.error),
+                          style: AppTypography.body1.copyWith(
+                            color: AppColors.error,
+                          ),
                         ),
                       );
                     }
 
-                    final packages = snapshot.data?['packages'] as List<dynamic>? ?? [];
-                    
+                    final packages =
+                        snapshot.data?['packages'] as List<dynamic>? ?? [];
+
                     return GridView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        mainAxisSpacing: 16,
-                        crossAxisSpacing: 16,
-                      ),
+                      gridDelegate:
+                          const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 16,
+                            crossAxisSpacing: 16,
+                          ),
                       itemCount: packages.length,
                       itemBuilder: (context, index) {
                         final package = packages[index];
@@ -204,7 +202,10 @@ class _WalletScreenState extends State<WalletScreen> {
                           price: package['price'] as int,
                           tokens: package['tokens'] as int,
                           popularBadge: package['popularBadge'] as String?,
-                          onTap: () => _showPurchaseDialog(package['price'] as int, package['tokens'] as int),
+                          onTap: () => _showPurchaseDialog(
+                            package['price'] as int,
+                            package['tokens'] as int,
+                          ),
                         );
                       },
                     );
@@ -230,12 +231,12 @@ class _WalletScreenState extends State<WalletScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Transactions List
                   _isLoadingTransactions
                       ? const Center(
                           child: CircularProgressIndicator(
-                            valueColor: AppColors.primary,
+                            color: AppColors.primary,
                           ),
                         )
                       : ListView.builder(
@@ -259,10 +260,7 @@ class _WalletScreenState extends State<WalletScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Purchase Tokens',
-          style: AppTypography.headline3,
-        ),
+        title: Text('Purchase Tokens', style: AppTypography.headline3),
         content: Text(
           'Purchase $tokens tokens for \$$price?',
           style: AppTypography.body1,
@@ -305,12 +303,13 @@ class _TokenPlanCard extends StatelessWidget {
   final int price;
   final int tokens;
   final String? popularBadge;
+  final VoidCallback onTap;
 
   const _TokenPlanCard({
     required this.price,
     required this.tokens,
     this.popularBadge,
-    required VoidCallback onTap,
+    required this.onTap,
   });
 
   @override
@@ -352,14 +351,17 @@ class _TokenPlanCard extends StatelessWidget {
                 ),
                 if (popularBadge != null) ...[
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: AppColors.primary,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       popularBadge!,
-                      style: AppTypography.caption.copyWith(
+                      style: AppTypography.caption1.copyWith(
                         color: AppColors.textInverse,
                         fontWeight: FontWeight.w600,
                       ),
@@ -386,9 +388,7 @@ class _TokenPlanCard extends StatelessWidget {
 class _TransactionTile extends StatelessWidget {
   final Transaction transaction;
 
-  const _TransactionTile({
-    required this.transaction,
-  });
+  const _TransactionTile({required this.transaction});
 
   @override
   Widget build(BuildContext context) {
@@ -422,9 +422,9 @@ class _TransactionTile extends StatelessWidget {
               size: 20,
             ),
           ),
-          
+
           const SizedBox(width: 12),
-          
+
           // Transaction Details
           Expanded(
             child: Column(
@@ -448,7 +448,9 @@ class _TransactionTile extends StatelessWidget {
                     ),
                     const Spacer(),
                     Text(
-                      transaction.type == TransactionType.credit ? 'credited' : 'debited',
+                      transaction.type == TransactionType.credit
+                          ? 'credited'
+                          : 'debited',
                       style: AppTypography.caption1.copyWith(
                         color: AppColors.textTertiary,
                       ),

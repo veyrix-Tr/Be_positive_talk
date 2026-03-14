@@ -131,7 +131,7 @@ class VendorDetailScreen extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                               Text(
-                                '(${_mockVendor.reviewCount}+)',
+                                '(${_mockVendor.totalReviews}+)',
                                 style: AppTypography.body2.copyWith(
                                   color: AppColors.textSecondary,
                                 ),

@@ -105,7 +105,7 @@ class _HomeScreenState extends State<HomeScreen>
                       const Spacer(),
 
                       // Wallet Badge
-                      WalletBadge(),
+                      WalletBadge(amount: 150.0),
                     ],
                   ),
                 ],
@@ -210,7 +210,7 @@ class _HomeScreenState extends State<HomeScreen>
                           _isLoadingVendors
                               ? const Center(
                                   child: CircularProgressIndicator(
-                                    valueColor: AppColors.primary,
+                                    color: AppColors.primary,
                                   ),
                                 )
                               : ListView.builder(

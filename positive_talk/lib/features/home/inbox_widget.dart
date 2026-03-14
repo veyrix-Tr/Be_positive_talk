@@ -4,17 +4,15 @@ import '../../../shared/widgets/verified_badge.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 import '../../../services/chat_service.dart';
+import '../../../models/inbox_chat_model.dart';
 
 class InboxWidget extends StatelessWidget {
   const InboxWidget({super.key});
 
-  // Service instance
-  final ChatService _chatService = ChatService();
-
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<InboxChat>>(
-      future: _chatService.getInboxChats(),
+    return FutureBuilder(
+      future: ChatService().getInboxChats(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const Center(
@@ -103,7 +101,7 @@ class _ChatMessageTile extends StatelessWidget {
                       ),
                       const SizedBox(width: 8),
                       const VerifiedBadge(size: 10),
-                      if (chat.isUnread) ...[
+                      if (chat.unreadCount > 0) ...[
                         const SizedBox(width: 8),
                         Container(
                           width: 8,
@@ -135,12 +133,12 @@ class _ChatMessageTile extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        chat.date,
+                        chat.formattedDate,
                         style: AppTypography.caption1.copyWith(
                           color: AppColors.textTertiary,
                         ),
                       ),
-                      if (chat.isUnread) ...[
+                      if (chat.unreadCount > 0) ...[
                         const SizedBox(width: 8),
                         Container(
                           width: 8,
@@ -161,26 +159,4 @@ class _ChatMessageTile extends StatelessWidget {
       ),
     );
   }
-}
-
-class InboxChat {
-  final String id;
-  final String vendorId;
-  final String vendorName;
-  final String vendorImage;
-  final String lastMessage;
-  final String date;
-  final bool isVerified;
-  final bool isUnread;
-
-  InboxChat({
-    required this.id,
-    required this.vendorId,
-    required this.vendorName,
-    required this.vendorImage,
-    required this.lastMessage,
-    required this.date,
-    required this.isVerified,
-    required this.isUnread,
-  });
 }

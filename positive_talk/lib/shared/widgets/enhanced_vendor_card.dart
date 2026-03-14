@@ -99,7 +99,7 @@ class EnhancedVendorCard extends StatelessWidget {
                     ),
                     const SizedBox(width: 4),
                     Text(
-                      '(${vendor.reviewCount}+)',
+                      '(${vendor.totalReviews}+)',
                       style: AppTypography.body2.copyWith(
                         color: AppColors.textSecondary,
                       ),

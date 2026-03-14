@@ -27,7 +27,7 @@ class Transaction {
       id: json['id'] as String,
       userId: json['userId'] as String,
       type: TransactionType.values.firstWhere(
-        (type) => type.name == json['type'],
+        (type) => type.toString() == json['type'] as String,
         orElse: () => TransactionType.credit,
       ),
       tokens: json['tokens'] as int,
@@ -41,60 +41,11 @@ class Transaction {
     return {
       'id': id,
       'userId': userId,
-      'type': type.name,
+      'type': type.toString(),
       'tokens': tokens,
       'amount': amount,
       'description': description,
       'createdAt': createdAt.toIso8601String(),
     };
-  }
-
-  Transaction copyWith({
-    String? id,
-    String? userId,
-    TransactionType? type,
-    int? tokens,
-    double? amount,
-    String? description,
-    DateTime? createdAt,
-  }) {
-    return Transaction(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      type: type ?? this.type,
-      tokens: tokens ?? this.tokens,
-      amount: amount ?? this.amount,
-      description: description ?? this.description,
-      createdAt: createdAt ?? this.createdAt,
-    );
-  }
-
-  @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is Transaction &&
-        other.id == id &&
-        other.userId == userId &&
-        other.type == type &&
-        other.tokens == tokens &&
-        other.amount == amount &&
-        other.description == description &&
-        other.createdAt == createdAt;
-  }
-
-  @override
-  int get hashCode {
-    return id.hashCode ^
-        userId.hashCode ^
-        type.hashCode ^
-        tokens.hashCode ^
-        amount.hashCode ^
-        description.hashCode ^
-        createdAt.hashCode;
-  }
-
-  @override
-  String toString() {
-    return 'Transaction(id: $id, userId: $userId, type: $type, tokens: $tokens, amount: $amount, description: $description, createdAt: $createdAt)';
   }
 }

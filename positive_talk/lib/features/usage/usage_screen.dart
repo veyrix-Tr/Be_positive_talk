@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 import '../../../services/usage_service.dart';
+import '../../../models/usage_record_model.dart';
 
 class UsageScreen extends StatelessWidget {
   const UsageScreen({super.key});
@@ -125,7 +126,7 @@ class _UsageRecordTile extends StatelessWidget {
 
                 // Date
                 Text(
-                  record.date,
+                  '${record.date.day}/${record.date.month}/${record.date.year}',
                   style: AppTypography.caption1.copyWith(
                     color: AppColors.textTertiary,
                   ),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../features/home/vendor_model.dart';
+import '../../models/vendor_model.dart';
 import '../../core/theme/colors.dart';
 import '../../core/theme/typography.dart';
 
@@ -36,7 +36,7 @@ class HostCard extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 30,
-                  backgroundImage: NetworkImage(vendor.image),
+                  backgroundImage: NetworkImage(vendor.profileImage),
                 ),
                 // Online status indicator
                 Positioned(

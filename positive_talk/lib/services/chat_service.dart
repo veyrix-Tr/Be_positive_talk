@@ -1,176 +1,157 @@
-import 'dart:async';
 import '../models/message_model.dart';
+import '../models/inbox_chat_model.dart';
 
 class ChatService {
   static final ChatService _instance = ChatService._internal();
   factory ChatService() => _instance;
   ChatService._internal();
 
-  // Mock chat data
-  final List<Message> _mockMessages = [
-    Message(
-      id: '1',
-      senderId: 'vendor_1',
-      receiverId: 'user_123',
-      text: '🙂 Let\'s make you HAPPY!',
-      timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-      isRead: true,
-    ),
-    Message(
-      id: '2',
-      senderId: 'user_123',
-      receiverId: 'vendor_1',
-      text: 'Hi! I need some career advice.',
-      timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
-      isRead: true,
-    ),
-    Message(
-      id: '3',
-      senderId: 'vendor_1',
-      receiverId: 'user_123',
-      text: 'I\'d be happy to help! What specific area are you interested in?',
-      timestamp: DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
-      isRead: true,
-    ),
-    Message(
-      id: '4',
-      senderId: 'vendor_2',
-      receiverId: 'user_123',
-      text: 'How can I help you today?',
-      timestamp: DateTime.now().subtract(const Duration(days: 1)),
-      isRead: false,
-    ),
-    Message(
-      id: '5',
-      senderId: 'vendor_3',
-      receiverId: 'user_123',
-      text: 'Looking forward to our session',
-      timestamp: DateTime.now().subtract(const Duration(days: 2)),
-      isRead: true,
-    ),
-    Message(
-      id: '6',
-      senderId: 'user_123',
-      receiverId: 'vendor_3',
-      text: 'Thank you! I\'m excited too.',
-      timestamp: DateTime.now().subtract(const Duration(days: 2, minutes: 15)),
-      isRead: true,
-    ),
+  // Mock message data
+  final Map<String, List<Message>> _mockMessages = {
+    '1': [
+      Message(
+        id: '1',
+        senderId: 'user1',
+        receiverId: '1',
+        text: 'Hello Aashna, I need some career advice.',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+        isRead: true,
+      ),
+      Message(
+        id: '2',
+        senderId: '1',
+        receiverId: 'user1',
+        text:
+            'Hi! I\'d be happy to help. What specific area are you looking to get guidance on?',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 28)),
+        isRead: true,
+      ),
+      Message(
+        id: '3',
+        senderId: 'user1',
+        receiverId: '1',
+        text: 'I\'m considering a career change but feeling uncertain.',
+        timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
+        isRead: false,
+      ),
+    ],
+    '2': [
+      Message(
+        id: '4',
+        senderId: 'user1',
+        receiverId: '2',
+        text:
+            'Hi Priya, I\'m interested in your relationship counseling services.',
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+        isRead: true,
+      ),
+      Message(
+        id: '5',
+        senderId: '2',
+        receiverId: 'user1',
+        text:
+            'Hello! Thank you for your interest. I\'d love to help you. When would you like to schedule our first session?',
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+        isRead: true,
+      ),
+    ],
+    '3': [
+      Message(
+        id: '6',
+        senderId: 'user1',
+        receiverId: '3',
+        text: 'Rajesh, I need business strategy advice for my startup.',
+        timestamp: DateTime.now().subtract(const Duration(days: 1)),
+        isRead: true,
+      ),
+    ],
+  };
+
+  // Mock inbox chats data
+  final List<Map<String, dynamic>> _mockInboxChats = [
+    {
+      'id': 'chat1',
+      'vendorId': '1',
+      'vendorName': 'Aashna',
+      'vendorImage': 'assets/profile1.png',
+      'lastMessage': 'I\'m considering a career change but feeling uncertain.',
+      'lastMessageTime': DateTime.now().subtract(const Duration(minutes: 25)),
+      'unreadCount': 1,
+      'isOnline': true,
+    },
+    {
+      'id': 'chat2',
+      'vendorId': '2',
+      'vendorName': 'Priya',
+      'vendorImage': 'assets/profile2.png',
+      'lastMessage':
+          'Hello! Thank you for your interest. I\'d love to help you.',
+      'lastMessageTime': DateTime.now().subtract(const Duration(hours: 2)),
+      'unreadCount': 0,
+      'isOnline': true,
+    },
+    {
+      'id': 'chat3',
+      'vendorId': '3',
+      'vendorName': 'Rajesh',
+      'vendorImage': 'assets/profile3.png',
+      'lastMessage': 'Rajesh, I need business strategy advice for my startup.',
+      'lastMessageTime': DateTime.now().subtract(const Duration(days: 1)),
+      'unreadCount': 0,
+      'isOnline': false,
+    },
   ];
 
-  // Mock inbox data
-  final List<InboxChat> _mockInbox = [
-    InboxChat(
-      id: '1',
-      vendorId: 'vendor_1',
-      vendorName: 'Aashna',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: '🙂 Let\'s make you HAPPY!',
-      date: 'Mar 5, 2026',
-      isVerified: true,
-      isUnread: false,
-    ),
-    InboxChat(
-      id: '2',
-      vendorId: 'vendor_2',
-      vendorName: 'Mike Chen',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: 'How can I help you today?',
-      date: 'Mar 4, 2026',
-      isVerified: true,
-      isUnread: true,
-    ),
-    InboxChat(
-      id: '3',
-      vendorId: 'vendor_3',
-      vendorName: 'Emma Davis',
-      vendorImage: 'assets/profile1.png',
-      lastMessage: 'Looking forward to our session',
-      date: 'Mar 3, 2026',
-      isVerified: true,
-      isUnread: false,
-    ),
-  ];
-
+  // Get inbox chats
   Future<List<InboxChat>> getInboxChats() async {
-    // Simulate API call delay
+    // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
-    
-    return _mockInbox;
+
+    return _mockInboxChats
+        .map(
+          (chatData) => InboxChat(
+            id: chatData['id'] as String,
+            vendorId: chatData['vendorId'] as String,
+            vendorName: chatData['vendorName'] as String,
+            vendorImage: chatData['vendorImage'] as String,
+            lastMessage: chatData['lastMessage'] as String,
+            lastMessageTime: chatData['lastMessageTime'] as DateTime,
+            unreadCount: chatData['unreadCount'] as int,
+            isOnline: chatData['isOnline'] as bool,
+          ),
+        )
+        .toList();
   }
 
+  // Get messages for a specific vendor
   Future<List<Message>> getMessages(String vendorId) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 400));
-    
-    // Filter messages by vendor
-    return _mockMessages.where((message) => 
-      message.senderId == vendorId || message.receiverId == vendorId
-    ).toList();
+    // Simulate network delay
+    await Future.delayed(const Duration(milliseconds: 500));
+
+    return _mockMessages[vendorId] ?? [];
   }
 
-  Future<Message> sendMessage(String receiverId, String text) async {
-    // Simulate API call delay
+  // Send a message
+  Future<Message> sendMessage(String vendorId, String text) async {
+    // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 300));
-    
+
     final newMessage = Message(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: 'user_123',
-      receiverId: receiverId,
+      senderId: 'user1', // Mock current user ID
+      receiverId: vendorId,
       text: text,
       timestamp: DateTime.now(),
       isRead: false,
     );
 
     // Add to mock messages
-    _mockMessages.add(newMessage);
-    
+    if (_mockMessages.containsKey(vendorId)) {
+      _mockMessages[vendorId]!.add(newMessage);
+    } else {
+      _mockMessages[vendorId] = [newMessage];
+    }
+
     return newMessage;
   }
-
-  Future<void> markMessagesAsRead(String vendorId) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 200));
-    
-    // Mark messages as read
-    for (int i = 0; i < _mockMessages.length; i++) {
-      final message = _mockMessages[i];
-      if (message.receiverId == 'user_123' && message.senderId == vendorId) {
-        _mockMessages[i] = message.copyWith(isRead: true);
-      }
-    }
-  }
-
-  Future<void> deleteChat(String vendorId) async {
-    // Simulate API call delay
-    await Future.delayed(const Duration(milliseconds: 300));
-    
-    // Remove messages and inbox entry
-    _mockMessages.removeWhere((message) => 
-      message.senderId == vendorId || message.receiverId == vendorId
-    );
-    _mockInbox.removeWhere((chat) => chat.vendorId == vendorId);
-  }
-}
-
-class InboxChat {
-  final String id;
-  final String vendorId;
-  final String vendorName;
-  final String vendorImage;
-  final String lastMessage;
-  final String date;
-  final bool isVerified;
-  final bool isUnread;
-
-  InboxChat({
-    required this.id,
-    required this.vendorId,
-    required this.vendorName,
-    required this.vendorImage,
-    required this.lastMessage,
-    required this.date,
-    required this.isVerified,
-    required this.isUnread,
-  });
 }
