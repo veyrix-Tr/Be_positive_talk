@@ -1,4 +1,5 @@
 const Message = require("../models/Message");
+const { sendNotification } = require("../services/notification_service");
 
 exports.getChatHistory = async (req, res) => {
 

@@ -1,4 +1,5 @@
 const Message = require("../models/Message");
+const { sendNotification } = require("../services/notification_service");
 
 module.exports = function(io) {
 
@@ -23,6 +24,13 @@ module.exports = function(io) {
         receiverId,
         text
       });
+
+      // Send notification to receiver
+      await sendNotification(
+        receiverId,
+        "New Message",
+        "You received a new message"
+      );
 
       const roomId = [senderId, receiverId].sort().join("_");
 

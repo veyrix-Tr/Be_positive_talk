@@ -3,6 +3,7 @@ const { createRazorpayOrder } = require("../services/payment_service");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
 const Referral = require("../models/Referral");
+const { sendNotification } = require("../services/notification_service");
 
 const REFERRAL_REWARD = 50;
 const DISCOUNT_TOKENS = 20;
@@ -74,6 +75,13 @@ exports.verifyPayment = async (req, res) => {
           rewardTokens: REFERRAL_REWARD,
           status: "completed"
         });
+
+        // Send referral reward notification
+        await sendNotification(
+          referrer._id,
+          "Referral Reward",
+          "You earned referral tokens"
+        );
       }
     }
 
@@ -86,6 +94,13 @@ exports.verifyPayment = async (req, res) => {
       amount: tokens,
       description: "Token purchase"
     });
+
+    // Send payment success notification
+    await sendNotification(
+      userId,
+      "Payment Successful",
+      "Your wallet has been credited"
+    );
 
     res.json({
       success: true,

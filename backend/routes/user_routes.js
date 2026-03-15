@@ -6,6 +6,18 @@ const userController = require("../controllers/user_controller");
 
 const authMiddleware = require("../middleware/auth_middleware");
 
+router.post(
+  "/test-notification",
+  authMiddleware,
+  userController.testNotification
+);
+
+router.post(
+  "/device-token",
+  authMiddleware,
+  userController.saveDeviceToken
+);
+
 router.get(
   "/profile",
   authMiddleware,
