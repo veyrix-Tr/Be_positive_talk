@@ -19,7 +19,7 @@ exports.sendOTP = async (req, res) => {
 
 exports.verifyOTP = async (req, res) => {
 
-  const { phoneNumber, otp } = req.body;
+  const { phoneNumber, otp, referralCode } = req.body;
 
   if (otpStore[phoneNumber] !== otp) {
     return res.status(400).json({ message: "Invalid OTP" });
@@ -28,7 +28,19 @@ exports.verifyOTP = async (req, res) => {
   let user = await User.findOne({ phoneNumber });
 
   if (!user) {
-    user = await User.create({ phoneNumber });
+    let referrer = null;
+
+    if (referralCode) {
+      referrer = await User.findOne({
+        referralCode: referralCode
+      });
+    }
+
+    user = await User.create({
+      phoneNumber,
+      referralCode: generateReferralCode(),
+      referredBy: referrer ? referrer._id : null
+    });
   }
 
   const token = jwt.sign(
@@ -45,3 +57,17 @@ exports.verifyOTP = async (req, res) => {
 
 };
 
+const generateReferralCode = () => {
+
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+
+  let code = "";
+
+  for (let i = 0; i < 8; i++) {
+
+    code += chars.charAt(Math.floor(Math.random() * chars.length));
+
+  }
+
+  return code;
+};

@@ -2,6 +2,10 @@ const crypto = require("crypto");
 const { createRazorpayOrder } = require("../services/payment_service");
 const User = require("../models/User");
 const Transaction = require("../models/Transaction");
+const Referral = require("../models/Referral");
+
+const REFERRAL_REWARD = 50;
+const DISCOUNT_TOKENS = 20;
 
 exports.createOrder = async (req, res) => {
   try {
@@ -52,6 +56,26 @@ exports.verifyPayment = async (req, res) => {
     const user = await User.findById(userId);
 
     user.tokenBalance += tokens;
+
+    if (!user.firstPurchaseCompleted) {
+      user.firstPurchaseCompleted = true;
+
+      if (user.referredBy) {
+        const referrer = await User.findById(user.referredBy);
+        
+        referrer.tokenBalance += REFERRAL_REWARD;
+        user.tokenBalance += DISCOUNT_TOKENS;
+        
+        await referrer.save();
+        
+        await Referral.create({
+          referrerUserId: referrer._id,
+          referredUserId: user._id,
+          rewardTokens: REFERRAL_REWARD,
+          status: "completed"
+        });
+      }
+    }
 
     await user.save();
 

@@ -1,21 +1,12 @@
 const mongoose = require("mongoose");
 
-const UserSchema = new mongoose.Schema({
-  phoneNumber: {
-    type: String,
-    required: true,
-    unique: true
-  },
+const userSchema = new mongoose.Schema({
 
-  name: {
-    type: String,
-    default: ""
-  },
+  phoneNumber: String,
 
-  profileImage: {
-    type: String,
-    default: ""
-  },
+  name: String,
+
+  profileImage: String,
 
   tokenBalance: {
     type: Number,
@@ -23,13 +14,26 @@ const UserSchema = new mongoose.Schema({
   },
 
   referralCode: {
-    type: String
+    type: String,
+    unique: true
+  },
+
+  referredBy: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null
+  },
+
+  firstPurchaseCompleted: {
+    type: Boolean,
+    default: false
   },
 
   createdAt: {
     type: Date,
     default: Date.now
   }
+
 });
 
-module.exports = mongoose.model("User", UserSchema);
+module.exports = mongoose.model("User", userSchema);
