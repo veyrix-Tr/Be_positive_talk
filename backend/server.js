@@ -11,7 +11,9 @@ const authRoutes = require("./routes/auth_routes");
 const vendorRoutes = require("./routes/vendor_routes");
 const walletRoutes = require("./routes/wallet_routes");
 const chatRoutes = require("./routes/chat_routes");
+const paymentRoutes = require("./routes/payment_routes");
 const initChatSocket = require("./sockets/chat_socket");
+
 
 
 connectDB();
@@ -25,6 +27,7 @@ app.use("/auth", authRoutes);
 app.use("/vendors", vendorRoutes);
 app.use("/wallet", walletRoutes);
 app.use("/chat", chatRoutes);
+app.use("/payment", paymentRoutes);
 
 app.get("/", (req, res) => {
   res.send("Backend server running successfully");

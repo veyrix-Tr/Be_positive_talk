@@ -1,29 +1,34 @@
 const mongoose = require("mongoose");
 
-const ReferralSchema = new mongoose.Schema({
+const referralSchema = new mongoose.Schema({
 
-  referrerUserId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  },
+    referrerUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
 
-  referredUserId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "User"
-  },
+    referredUserId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: true
+    },
 
-  rewardTokens: Number,
+    rewardTokens: {
+        type: Number,
+        default: 50
+    },
 
-  status: {
-    type: String,
-    default: "pending"
-  },
+    status: {
+        type: String,
+        default: "completed"
+    },
 
-  createdAt: {
-    type: Date,
-    default: Date.now
-  }
+    createdAt: {
+        type: Date,
+        default: Date.now
+    }
 
 });
 
-module.exports = mongoose.model("Referral", ReferralSchema);
+module.exports = mongoose.model("Referral", referralSchema);

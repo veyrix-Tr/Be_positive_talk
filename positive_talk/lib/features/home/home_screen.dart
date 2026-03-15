@@ -31,6 +31,10 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _tabController.addListener(() {
+      if (!mounted) return;
+      setState(() {});
+    });
     _loadVendors();
   }
 
@@ -67,17 +71,27 @@ class _HomeScreenState extends State<HomeScreen>
             // Top Section - Header with Wallet Badge and Drawer
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24.0),
+              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppColors.surface,
+                    AppColors.surface.withValues(alpha: 0.85),
+                  ],
+                ),
                 borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(24),
                   bottomRight: Radius.circular(24),
                 ),
+                border: Border.all(
+                  color: AppColors.border.withValues(alpha: 0.25),
+                ),
               ),
               child: Column(
                 children: [
-                  const SizedBox(height: 32), // Status bar height
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       // Hamburger Menu
@@ -94,12 +108,26 @@ class _HomeScreenState extends State<HomeScreen>
                       const Spacer(),
 
                       // Title
-                      Text(
-                        'Positive Talk',
-                        style: AppTypography.headline2.copyWith(
-                          color: AppColors.textPrimary,
-                          fontWeight: FontWeight.w700,
-                        ),
+                      Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Positive Talk',
+                            style: AppTypography.headline3.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w800,
+                              letterSpacing: 0.2,
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Text(
+                            'Find verified listeners',
+                            style: AppTypography.caption1.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
                       ),
 
                       const Spacer(),
@@ -126,10 +154,7 @@ class _HomeScreenState extends State<HomeScreen>
                   children: [
                     // Tab Bar
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 24.0,
-                        vertical: 16.0,
-                      ),
+                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
                       child: Row(
                         children: [
                           // Verified Tab
@@ -138,16 +163,31 @@ class _HomeScreenState extends State<HomeScreen>
                               onTap: () => _tabController.animateTo(0),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
+                                  vertical: 10.0,
                                 ),
                                 decoration: BoxDecoration(
+                                  gradient: _tabController.index == 0
+                                      ? const LinearGradient(
+                                          colors: AppColors.primaryGradient,
+                                        )
+                                      : null,
                                   color: _tabController.index == 0
-                                      ? AppColors.primary
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                      ? null
+                                      : AppColors.card.withValues(alpha: 0.35),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: _tabController.index == 0
+                                        ? AppColors.primary.withValues(
+                                            alpha: 0.25,
+                                          )
+                                        : AppColors.border.withValues(
+                                            alpha: 0.25,
+                                          ),
+                                  ),
                                 ),
                                 child: Text(
                                   'Verified',
+                                  textAlign: TextAlign.center,
                                   style: AppTypography.buttonMedium.copyWith(
                                     color: _tabController.index == 0
                                         ? AppColors.textInverse
@@ -167,16 +207,31 @@ class _HomeScreenState extends State<HomeScreen>
                               onTap: () => _tabController.animateTo(1),
                               child: Container(
                                 padding: const EdgeInsets.symmetric(
-                                  vertical: 8.0,
+                                  vertical: 10.0,
                                 ),
                                 decoration: BoxDecoration(
+                                  gradient: _tabController.index == 1
+                                      ? const LinearGradient(
+                                          colors: AppColors.primaryGradient,
+                                        )
+                                      : null,
                                   color: _tabController.index == 1
-                                      ? AppColors.primary
-                                      : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(12),
+                                      ? null
+                                      : AppColors.card.withValues(alpha: 0.35),
+                                  borderRadius: BorderRadius.circular(14),
+                                  border: Border.all(
+                                    color: _tabController.index == 1
+                                        ? AppColors.primary.withValues(
+                                            alpha: 0.25,
+                                          )
+                                        : AppColors.border.withValues(
+                                            alpha: 0.25,
+                                          ),
+                                  ),
                                 ),
                                 child: Text(
                                   'Inbox',
+                                  textAlign: TextAlign.center,
                                   style: AppTypography.buttonMedium.copyWith(
                                     color: _tabController.index == 1
                                         ? AppColors.textInverse
@@ -214,7 +269,12 @@ class _HomeScreenState extends State<HomeScreen>
                                   ),
                                 )
                               : ListView.builder(
-                                  padding: const EdgeInsets.all(16.0),
+                                  padding: const EdgeInsets.fromLTRB(
+                                    16.0,
+                                    12.0,
+                                    16.0,
+                                    24.0,
+                                  ),
                                   itemCount: _vendors.length,
                                   itemBuilder: (context, index) {
                                     final vendor = _vendors[index];

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/typography.dart';
+import '../../core/theme/colors.dart';
 
 class PrimaryButton extends StatelessWidget {
   final String text;
@@ -22,18 +23,45 @@ class PrimaryButton extends StatelessWidget {
     return SizedBox(
       width: fullWidth ? double.infinity : null,
       height: height ?? 48,
-      child: ElevatedButton(
-        onPressed: isLoading ? null : onPressed,
-        child: isLoading
-            ? const SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  strokeWidth: 2,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(colors: AppColors.primaryGradient),
+          borderRadius: BorderRadius.circular(14),
+          boxShadow: [
+            BoxShadow(
+              color: AppColors.primary.withValues(alpha: 0.35),
+              blurRadius: 18,
+              offset: const Offset(0, 10),
+            ),
+          ],
+        ),
+        child: ElevatedButton(
+          onPressed: isLoading ? null : onPressed,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.transparent,
+            shadowColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+          ),
+          child: isLoading
+              ? const SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                )
+              : Text(
+                  text,
+                  style: AppTypography.buttonLarge.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.6,
+                  ),
                 ),
-              )
-            : Text(text, style: AppTypography.button),
+        ),
       ),
     );
   }
