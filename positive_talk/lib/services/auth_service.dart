@@ -71,6 +71,31 @@ class AuthService {
     }
   }
 
+  // Update user profile
+  Future<User> updateProfile({
+    String? name,
+    String? phoneNumber,
+    String? profileImage,
+  }) async {
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.put(
+        '/user/profile',
+        requireAuth: true,
+        body: {
+          if (name != null) 'name': name,
+          if (phoneNumber != null) 'phoneNumber': phoneNumber,
+          if (profileImage != null) 'profileImage': profileImage,
+        },
+      );
+      final userData = apiClient.handleResponse(response);
+      _currentUser = User.fromJson(userData['user']!);
+      return _currentUser!;
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
+  }
+
   // Get current user
   Future<User?> getCurrentUser() async {
     if (_currentUser != null) return _currentUser;

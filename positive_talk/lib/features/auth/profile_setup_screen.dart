@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
+import '../../../services/auth_service.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -22,21 +23,36 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
     super.dispose();
   }
 
-  void _continueToHome() {
+  void _continueToHome() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Simulate profile setup
-      Future.delayed(const Duration(seconds: 1), () {
+      try {
+        final authService = AuthService();
+        print(_nameController.text);
+        await authService.updateProfile(name: _nameController.text);
+
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
           context.go('/home');
         }
-      });
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to update profile: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
 
