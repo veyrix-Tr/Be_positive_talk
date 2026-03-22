@@ -18,6 +18,34 @@ class _OTPScreenState extends State<OTPScreen> {
   );
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
   bool _isLoading = false;
+  String? _phoneNumber;
+
+  @override
+  void initState() {
+    super.initState();
+    // Do not call GoRouterState.of(context) here
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Safely retrieve phone number from route extra
+    final extra = GoRouterState.of(context).extra;
+    if (extra is String && extra.isNotEmpty) {
+      _phoneNumber = extra;
+    } else {
+      // Phone number missing: navigate back to login
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Phone number missing. Please log in again.'),
+            backgroundColor: AppColors.error,
+          ),
+        );
+        context.go('/login');
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -41,6 +69,17 @@ class _OTPScreenState extends State<OTPScreen> {
   }
 
   void _verifyOTP() async {
+    if (_phoneNumber == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Phone number missing. Please log in again.'),
+          backgroundColor: AppColors.error,
+        ),
+      );
+      context.go('/login');
+      return;
+    }
+
     String otp = _controllers.map((controller) => controller.text).join();
 
     if (otp.length == 6) {
@@ -49,21 +88,24 @@ class _OTPScreenState extends State<OTPScreen> {
       });
 
       try {
-        // Get phone number from previous screen (you might want to pass it as argument)
-        // For now, we'll use a hardcoded phone number - in real app, pass it from login screen
         final authService = AuthService();
-        await authService.verifyOTP(
-          '9999999999',
-          otp,
-        ); // Replace with actual phone number
+        final user = await authService.verifyOTP(_phoneNumber!, otp);
 
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
-          context.go('/profile-setup');
+          print('OTP verification successful, user: ${user.name}');
+
+          // Check if user already has a name
+          if (user.name != "Unknown User") {
+            context.go('/home');
+          } else {
+            context.go('/profile-setup');
+          }
         }
       } catch (e) {
+        print('DEBUG: OTP verification failed: $e');
         if (mounted) {
           setState(() {
             _isLoading = false;
@@ -76,11 +118,18 @@ class _OTPScreenState extends State<OTPScreen> {
           );
         }
       }
+    } else {
+      print('DEBUG: OTP length is not 6: $otp');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // Optionally show a loading indicator while phone number is being retrieved
+    if (_phoneNumber == null) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+
     return Scaffold(
       body: SafeArea(
         child: Container(
@@ -275,13 +324,29 @@ class _OTPScreenState extends State<OTPScreen> {
                       ),
                       const SizedBox(height: 8),
                       TextButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          if (_phoneNumber == null) return;
                           // Resend OTP logic
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('OTP resent successfully'),
-                            ),
-                          );
+                          try {
+                            final authService = AuthService();
+                            await authService.sendOTP(_phoneNumber!);
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('OTP resent successfully'),
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text('Failed to resend OTP: $e'),
+                                  backgroundColor: AppColors.error,
+                                ),
+                              );
+                            }
+                          }
                         },
                         child: Text(
                           'Resend OTP',

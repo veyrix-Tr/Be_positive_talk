@@ -32,6 +32,7 @@ class AuthService {
   }) async {
     try {
       final apiClient = ApiClient();
+
       final response = await apiClient.post(
         '/auth/verify-otp',
         body: {
@@ -55,6 +56,7 @@ class AuthService {
 
       return _currentUser!;
     } catch (e) {
+      print('DEBUG: AuthService.verifyOTP error: $e');
       throw Exception('Failed to verify OTP: $e');
     }
   }

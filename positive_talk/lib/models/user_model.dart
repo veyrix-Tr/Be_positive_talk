@@ -18,15 +18,25 @@ class User {
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      phoneNumber: json['phoneNumber'] as String,
-      profileImage: json['profileImage'] as String,
-      referralCode: json['referralCode'] as String,
-      tokenBalance: json['tokenBalance'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
+    try {
+      print('DEBUG: Parsing User from JSON: $json');
+
+      return User(
+        id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? 'Unknown User',
+        phoneNumber: json['phoneNumber']?.toString() ?? '',
+        profileImage: json['profileImage']?.toString() ?? '',
+        referralCode: json['referralCode']?.toString() ?? '',
+        tokenBalance: (json['tokenBalance'] as num?)?.toInt() ?? 0,
+        createdAt: json['createdAt'] != null
+            ? DateTime.parse(json['createdAt'] as String)
+            : DateTime.now(),
+      );
+    } catch (e) {
+      print('DEBUG: Error parsing User JSON: $e');
+      print('DEBUG: JSON data was: $json');
+      rethrow;
+    }
   }
 
   Map<String, dynamic> toJson() {

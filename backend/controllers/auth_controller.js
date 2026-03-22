@@ -5,6 +5,7 @@ let otpStore = {};
 
 exports.sendOTP = async (req, res) => {
 
+  console.log(req.body);
   const { phoneNumber } = req.body;
 
   const otp = "123456"; // simulated OTP
@@ -20,12 +21,15 @@ exports.sendOTP = async (req, res) => {
 exports.verifyOTP = async (req, res) => {
 
   const { phoneNumber, otp, referralCode } = req.body;
-
+  
   if (otpStore[phoneNumber] !== otp) {
     return res.status(400).json({ message: "Invalid OTP" });
   }
 
+  console.log("OTP verified successfully");
+
   let user = await User.findOne({ phoneNumber });
+
 
   if (!user) {
     let referrer = null;

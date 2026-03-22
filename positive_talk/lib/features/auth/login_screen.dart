@@ -37,7 +37,9 @@ class _LoginScreenState extends State<LoginScreen> {
           setState(() {
             _isLoading = false;
           });
-          context.go('/otp');
+
+          // Pass the phone number to OTPScreen via 'extra'
+          context.go('/otp', extra: _phoneController.text);
         }
       } catch (e) {
         if (mounted) {
