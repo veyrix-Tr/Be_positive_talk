@@ -1,26 +1,30 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Primary colors - Deep violet/indigo theme
-  static const Color primary = Color(0xFF6366F1); // Modern indigo
-  static const Color primaryVariant = Color(0xFF4F46E5); // Deeper indigo
-  static const Color primaryLight = Color(0xFF818CF8); // Lighter indigo
+  // Primary colors - Premium navy/indigo theme
+  static const Color primary = Color(0xFF4F46E5); // Professional indigo
+  static const Color primaryVariant = Color(0xFF4338CA); // Deeper indigo
+  static const Color primaryLight = Color(0xFF6366F1); // Lighter indigo
+  static const Color primaryDark = Color(0xFF3730A3); // Darker indigo
 
-  // Background colors - Very dark neutral
-  static const Color background = Color(0xFF0A0A0F); // Very dark
-  static const Color surface = Color(0xFF1A1A23); // Slightly lighter dark
-  static const Color card = Color(0xFF252530); // Card surface
-  static const Color cardHover = Color(0xFF2A2A35); // Card hover state
+  // Background colors - Sophisticated dark theme
+  static const Color background = Color(0xFF0F0F1E); // Rich dark blue
+  static const Color surface = Color(0xFF1E1E2E); // Elevated surface
+  static const Color card = Color(0xFF252535); // Card surface
+  static const Color cardHover = Color(0xFF2A2A3F); // Card hover state
+  static const Color overlay = Color(0x990F0F1E); // Semi-transparent overlay
 
-  // Text colors - High contrast
+  // Text colors - Enhanced contrast and readability
   static const Color textPrimary = Color(0xFFFFFFFF); // Pure white
-  static const Color textSecondary = Color(0xFFA1A1AA); // Muted gray
-  static const Color textTertiary = Color(0xFF71717A); // More muted
-  static const Color textInverse = Color(0xFF0A0A0F); // For colored backgrounds
+  static const Color textSecondary = Color(0xFFCBD5E1); // Soft blue-gray
+  static const Color textTertiary = Color(0xFF94A3B8); // Muted blue-gray
+  static const Color textInverse = Color(0xFF0F0F1E); // For colored backgrounds
+  static const Color textOnCard = Color(0xFFE2E8F0); // Light text on cards
 
-  // Accent colors - Modern palette
-  static const Color accent = Color(0xFF22D3EE); // Modern cyan
-  static const Color accentLight = Color(0xFF67E8F9); // Light cyan
+  // Accent colors - Vibrant and professional
+  static const Color accent = Color(0xFF06B6D4); // Modern cyan
+  static const Color accentLight = Color(0xFF22D3EE); // Bright cyan
+  static const Color accentDark = Color(0xFF0891B2); // Darker cyan
 
   // Status colors - Clear semantic meaning
   static const Color success = Color(0xFF10B981); // Modern green
@@ -29,29 +33,56 @@ class AppColors {
   static const Color warningLight = Color(0xFFFCD34D); // Light amber
   static const Color error = Color(0xFFEF4444); // Modern red
   static const Color errorLight = Color(0xFFF87171); // Light red
+  static const Color info = Color(0xFF3B82F6); // Information blue
 
-  // Border and divider colors - Subtle
-  static const Color border = Color(0xFF3F3F46); // Subtle border
-  static const Color borderLight = Color(0xFF4F4F56); // Lighter border
-  static const Color divider = Color(0xFF2A2A2F); // Divider
+  // Border and divider colors - Subtle and elegant
+  static const Color border = Color(0xFF334155); // Subtle border
+  static const Color borderLight = Color(0xFF475569); // Lighter border
+  static const Color divider = Color(0xFF1E293B); // Divider
+  static const Color outline = Color(0xFF475569); // Outline color
 
   // Status indicators
   static const Color online = Color(0xFF10B981); // Green for online
   static const Color offline = Color(0xFF6B7280); // Gray for offline
   static const Color away = Color(0xFFF59E0B); // Amber for away
+  static const Color busy = Color(0xFFEF4444); // Red for busy
 
-  // Special colors
+  // Special colors - Glassmorphism and effects
+  static const Color glass = Color(0x1AFFFFFF); // Glass effect
   static const Color shadow = Color(0x1A000000); // Shadow color
-  static const Color overlay = Color(0x800A0A0F); // Overlay for modals
+  static const Color shadowLight = Color(0x0D000000); // Light shadow
+  static const Color shimmer = Color(0xFFE2E8F0); // Shimmer effect
 
-  // Gradient colors
+  // Gradient colors - Rich and vibrant
   static const List<Color> primaryGradient = [
-    Color(0xFF6366F1),
-    Color(0xFF8B5CF6),
+    Color(0xFF4F46E5),
+    Color(0xFF7C3AED),
+    Color(0xFF06B6D4),
   ];
 
   static const List<Color> cardGradient = [
-    Color(0xFF252530),
-    Color(0xFF2A2A35),
+    Color(0xFF252535),
+    Color(0xFF2A2A3F),
+    Color(0xFF1E1E2E),
+  ];
+
+  static const List<Color> accentGradient = [
+    Color(0xFF06B6D4),
+    Color(0xFF22D3EE),
+  ];
+
+  static const List<Color> successGradient = [
+    Color(0xFF10B981),
+    Color(0xFF34D399),
+  ];
+
+  static const List<Color> warningGradient = [
+    Color(0xFFF59E0B),
+    Color(0xFFFCD34D),
+  ];
+
+  static const List<Color> errorGradient = [
+    Color(0xFFEF4444),
+    Color(0xFFF87171),
   ];
 }

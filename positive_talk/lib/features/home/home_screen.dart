@@ -19,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  late AnimationController _headerAnimationController;
+  late Animation<double> _headerSlideAnimation;
 
   // Service instances
   final VendorService _vendorService = VendorService();
@@ -31,11 +33,27 @@ class _HomeScreenState extends State<HomeScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+
+    // Header animation
+    _headerAnimationController = AnimationController(
+      duration: const Duration(milliseconds: 800),
+      vsync: this,
+    );
+    _headerSlideAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _headerAnimationController,
+        curve: Curves.easeOutCubic,
+      ),
+    );
+
     _tabController.addListener(() {
       if (!mounted) return;
       setState(() {});
     });
     _loadVendors();
+
+    // Start header animation
+    _headerAnimationController.forward();
   }
 
   Future<void> _loadVendors() async {
@@ -58,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen>
   @override
   void dispose() {
     _tabController.dispose();
+    _headerAnimationController.dispose();
     super.dispose();
   }
 
@@ -68,191 +87,185 @@ class _HomeScreenState extends State<HomeScreen>
       body: SafeArea(
         child: Column(
           children: [
-            // Top Section - Header with Wallet Badge and Drawer
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 20.0),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    AppColors.surface,
-                    AppColors.surface.withValues(alpha: 0.85),
-                  ],
-                ),
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(24),
-                  bottomRight: Radius.circular(24),
-                ),
-                border: Border.all(
-                  color: AppColors.border.withValues(alpha: 0.25),
-                ),
-              ),
-              child: Column(
-                children: [
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      // Hamburger Menu
-                      Builder(
-                        builder: (context) => IconButton(
-                          onPressed: () => Scaffold.of(context).openDrawer(),
-                          icon: const Icon(
-                            Icons.menu,
-                            color: AppColors.textPrimary,
-                          ),
-                        ),
-                      ),
-
-                      const Spacer(),
-
-                      // Title
-                      Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            'Positive Talk',
-                            style: AppTypography.headline3.copyWith(
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w800,
-                              letterSpacing: 0.2,
-                            ),
-                          ),
-                          const SizedBox(height: 2),
-                          Text(
-                            'Find verified listeners',
-                            style: AppTypography.caption1.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
+            // Animated Header Section
+            AnimatedBuilder(
+              animation: _headerSlideAnimation,
+              builder: (context, child) {
+                return Transform.translate(
+                  offset: Offset(0, (1.0 - _headerSlideAnimation.value) * -20),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.fromLTRB(24.0, 20.0, 24.0, 20.0),
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [
+                          AppColors.surface,
+                          AppColors.surface.withValues(alpha: 0.9),
                         ],
                       ),
+                      borderRadius: const BorderRadius.only(
+                        bottomLeft: Radius.circular(32),
+                        bottomRight: Radius.circular(32),
+                      ),
+                      border: Border.all(
+                        color: AppColors.border.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          blurRadius: 30,
+                          offset: const Offset(0, 15),
+                        ),
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.2),
+                          blurRadius: 60,
+                          offset: const Offset(0, 30),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            // Hamburger Menu
+                            Container(
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: AppColors.card.withValues(alpha: 0.8),
+                                borderRadius: BorderRadius.circular(12),
+                                border: Border.all(
+                                  color: AppColors.border.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  width: 1,
+                                ),
+                              ),
+                              child: Builder(
+                                builder: (context) => IconButton(
+                                  onPressed: () =>
+                                      Scaffold.of(context).openDrawer(),
+                                  icon: const Icon(
+                                    Icons.menu_rounded,
+                                    color: AppColors.textPrimary,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ),
 
-                      const Spacer(),
+                            const Spacer(),
 
-                      // Wallet Badge
-                      WalletBadge(amount: 150.0),
-                    ],
+                            // Title Section
+                            Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  'Positive Talk',
+                                  style: AppTypography.headline2.copyWith(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.w900,
+                                    letterSpacing: 0.5,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 6,
+                                  ),
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        AppColors.primary.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                        AppColors.accent.withValues(alpha: 0.1),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    'Find verified listeners',
+                                    style: AppTypography.caption1.copyWith(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+
+                            const Spacer(),
+
+                            // Wallet Badge
+                            WalletBadge(amount: 150.0),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                );
+              },
             ),
 
-            // Bottom Section - Tab Bar and Content
+            const SizedBox(height: 8),
+
+            // Main Content Area
             Expanded(
               child: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   color: AppColors.surface,
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(24),
-                    topRight: Radius.circular(24),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(32),
+                    topRight: Radius.circular(32),
                   ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.1),
+                      blurRadius: 40,
+                      offset: const Offset(0, -10),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
-                    // Tab Bar
+                    // Modern Tab Bar
                     Container(
-                      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 8.0),
+                      padding: const EdgeInsets.fromLTRB(
+                        24.0,
+                        20.0,
+                        24.0,
+                        12.0,
+                      ),
                       child: Row(
                         children: [
                           // Verified Tab
                           Expanded(
-                            child: GestureDetector(
+                            child: _buildTab(
+                              title: 'Verified',
+                              isActive: _tabController.index == 0,
                               onTap: () => _tabController.animateTo(0),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: _tabController.index == 0
-                                      ? const LinearGradient(
-                                          colors: AppColors.primaryGradient,
-                                        )
-                                      : null,
-                                  color: _tabController.index == 0
-                                      ? null
-                                      : AppColors.card.withValues(alpha: 0.35),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: _tabController.index == 0
-                                        ? AppColors.primary.withValues(
-                                            alpha: 0.25,
-                                          )
-                                        : AppColors.border.withValues(
-                                            alpha: 0.25,
-                                          ),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Verified',
-                                  textAlign: TextAlign.center,
-                                  style: AppTypography.buttonMedium.copyWith(
-                                    color: _tabController.index == 0
-                                        ? AppColors.textInverse
-                                        : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                              icon: Icons.verified_rounded,
                             ),
                           ),
 
-                          const SizedBox(width: 2),
+                          const SizedBox(width: 12),
 
                           // Inbox Tab
                           Expanded(
-                            child: GestureDetector(
+                            child: _buildTab(
+                              title: 'Inbox',
+                              isActive: _tabController.index == 1,
                               onTap: () => _tabController.animateTo(1),
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 10.0,
-                                ),
-                                decoration: BoxDecoration(
-                                  gradient: _tabController.index == 1
-                                      ? const LinearGradient(
-                                          colors: AppColors.primaryGradient,
-                                        )
-                                      : null,
-                                  color: _tabController.index == 1
-                                      ? null
-                                      : AppColors.card.withValues(alpha: 0.35),
-                                  borderRadius: BorderRadius.circular(14),
-                                  border: Border.all(
-                                    color: _tabController.index == 1
-                                        ? AppColors.primary.withValues(
-                                            alpha: 0.25,
-                                          )
-                                        : AppColors.border.withValues(
-                                            alpha: 0.25,
-                                          ),
-                                  ),
-                                ),
-                                child: Text(
-                                  'Inbox',
-                                  textAlign: TextAlign.center,
-                                  style: AppTypography.buttonMedium.copyWith(
-                                    color: _tabController.index == 1
-                                        ? AppColors.textInverse
-                                        : AppColors.textSecondary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
+                              icon: Icons.chat_rounded,
                             ),
                           ),
                         ],
-                      ),
-                    ),
-
-                    // Tab Indicator
-                    Container(
-                      height: 3,
-                      margin: const EdgeInsets.only(top: 8),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary,
-                        borderRadius: BorderRadius.circular(3),
                       ),
                     ),
 
@@ -263,28 +276,8 @@ class _HomeScreenState extends State<HomeScreen>
                         children: [
                           // Verified Tab - Vendor List
                           _isLoadingVendors
-                              ? const Center(
-                                  child: CircularProgressIndicator(
-                                    color: AppColors.primary,
-                                  ),
-                                )
-                              : ListView.builder(
-                                  padding: const EdgeInsets.fromLTRB(
-                                    16.0,
-                                    12.0,
-                                    16.0,
-                                    24.0,
-                                  ),
-                                  itemCount: _vendors.length,
-                                  itemBuilder: (context, index) {
-                                    final vendor = _vendors[index];
-                                    return EnhancedVendorCard(
-                                      vendor: vendor,
-                                      onTap: () =>
-                                          context.go('/vendor/${vendor.id}'),
-                                    );
-                                  },
-                                ),
+                              ? _buildLoadingState()
+                              : _buildVendorList(),
 
                           // Inbox Tab - Chat History
                           const InboxWidget(),
@@ -299,6 +292,100 @@ class _HomeScreenState extends State<HomeScreen>
         ),
       ),
       drawer: const AppDrawer(),
+    );
+  }
+
+  Widget _buildTab({
+    required String title,
+    required bool isActive,
+    required VoidCallback onTap,
+    required IconData icon,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 300),
+        decoration: BoxDecoration(
+          gradient: isActive
+              ? const LinearGradient(colors: AppColors.primaryGradient)
+              : LinearGradient(
+                  colors: [
+                    AppColors.card.withValues(alpha: 0.3),
+                    AppColors.card.withValues(alpha: 0.1),
+                  ],
+                ),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isActive
+                ? AppColors.primary.withValues(alpha: 0.3)
+                : AppColors.border.withValues(alpha: 0.2),
+            width: 2,
+          ),
+          boxShadow: isActive
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.4),
+                    blurRadius: 20,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : [],
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                icon,
+                color: isActive ? Colors.white : AppColors.textSecondary,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                title,
+                style: AppTypography.buttonMedium.copyWith(
+                  color: isActive ? Colors.white : AppColors.textSecondary,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircularProgressIndicator(color: AppColors.primary, strokeWidth: 3),
+          const SizedBox(height: 16),
+          Text(
+            'Loading verified listeners...',
+            style: AppTypography.body2.copyWith(color: AppColors.textSecondary),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildVendorList() {
+    return ListView.builder(
+      padding: const EdgeInsets.fromLTRB(16.0, 16.0, 16.0, 32.0),
+      itemCount: _vendors.length,
+      itemBuilder: (context, index) {
+        final vendor = _vendors[index];
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 500),
+          child: EnhancedVendorCard(
+            vendor: vendor,
+            onTap: () => context.go('/vendor/${vendor.id}'),
+          ),
+        );
+      },
     );
   }
 }
