@@ -1,0 +1,58 @@
+{
+  "usageRecords": [
+    {
+      "id": "usage_001",
+      "userId": "user_001",
+      "vendorId": "vendor_001",
+      "vendorName": "Emma Thompson",
+      "duration": 6,
+      "tokensUsed": 15,
+      "date": "2024-03-14T14:30:00Z"
+    },
+    {
+      "id": "usage_002",
+      "userId": "user_001",
+      "vendorId": "vendor_002",
+      "vendorName": "David Martinez", 
+      "duration": 3,
+      "tokensUsed": 8,
+      "date": "2024-03-12T16:45:00Z"
+    },
+    {
+      "id": "usage_003",
+      "userId": "user_001",
+      "vendorId": "vendor_003",
+      "vendorName": "Lisa Anderson",
+      "duration": 5,
+      "tokensUsed": 10,
+      "date": "2024-03-10T13:20:00Z"
+    },
+    {
+      "id": "usage_004",
+      "userId": "user_001",
+      "vendorId": "vendor_001",
+      "vendorName": "Emma Thompson",
+      "duration": 8,
+      "tokensUsed": 20,
+      "date": "2024-03-08T11:15:00Z"
+    },
+    {
+      "id": "usage_005",
+      "userId": "user_001",
+      "vendorId": "vendor_004",
+      "vendorName": "James Wilson",
+      "duration": 4,
+      "tokensUsed": 11,
+      "date": "2024-03-05T15:30:00Z"
+    },
+    {
+      "id": "usage_006",
+      "userId": "user_001",
+      "vendorId": "vendor_002",
+      "vendorName": "David Martinez",
+      "duration": 7,
+      "tokensUsed": 21,
+      "date": "2024-03-02T09:45:00Z"
+    }
+  ]
+}

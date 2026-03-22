@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import '../models/transaction_model.dart';
 
 class WalletService {
@@ -5,82 +7,82 @@ class WalletService {
   factory WalletService() => _instance;
   WalletService._internal();
 
-  // Mock balance
-  int _currentBalance = 150;
+  List<Transaction> _transactions = [];
+  int? _currentBalance;
 
-  // Mock transactions
-  final List<Transaction> _mockTransactions = [
-    Transaction(
-      id: '1',
-      userId: 'user1',
-      type: TransactionType.credit,
-      tokens: 100,
-      amount: 10.0,
-      description: 'Initial token purchase',
-      createdAt: DateTime.now().subtract(const Duration(days: 30)),
-    ),
-    Transaction(
-      id: '2',
-      userId: 'user1',
-      type: TransactionType.debit,
-      tokens: 75,
-      amount: 7.5,
-      description: 'Call with Aashna',
-      createdAt: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    Transaction(
-      id: '3',
-      userId: 'user1',
-      type: TransactionType.debit,
-      tokens: 80,
-      amount: 8.0,
-      description: 'Call with Priya',
-      createdAt: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    Transaction(
-      id: '4',
-      userId: 'user1',
-      type: TransactionType.credit,
-      tokens: 50,
-      amount: 5.0,
-      description: 'Referral bonus',
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-    ),
-    Transaction(
-      id: '5',
-      userId: 'user1',
-      type: TransactionType.debit,
-      tokens: 30,
-      amount: 3.0,
-      description: 'Call with Rajesh',
-      createdAt: DateTime.now().subtract(const Duration(hours: 3)),
-    ),
-  ];
+  // Load transactions from JSON file
+  Future<void> _loadTransactions() async {
+    if (_transactions.isNotEmpty) return;
+
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/transactions.json',
+      );
+      final Map<String, dynamic> data = json.decode(jsonString);
+      final List<dynamic> transactionsList = data['transactions'];
+
+      _transactions = transactionsList.map((json) {
+        // Convert JSON to match Transaction model
+        final transactionJson = {
+          'id': json['id'],
+          'userId': json['userId'],
+          'type': json['amount'] > 0 ? 'credit' : 'debit',
+          'tokens': json['tokens'].abs(),
+          'amount': json['amount'].abs(),
+          'description': json['description'],
+          'createdAt':
+              json['timestamp'], // Pass as string, Transaction.fromJson will parse it
+        };
+        return Transaction.fromJson(transactionJson);
+      }).toList();
+
+      // Calculate balance from transactions
+      _currentBalance =
+          150; // Starting balance (could also be loaded from users.json)
+      for (var transaction in _transactions) {
+        if (transaction.type == TransactionType.credit) {
+          _currentBalance = _currentBalance! + transaction.tokens;
+        } else {
+          _currentBalance = _currentBalance! - transaction.tokens;
+        }
+      }
+    } catch (e) {
+      // Fallback to empty list and default balance if JSON loading fails
+      _transactions = [];
+      _currentBalance = 150;
+    }
+  }
 
   // Get current balance
   Future<int> getBalance() async {
+    await _loadTransactions();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 400));
 
-    return _currentBalance;
+    return _currentBalance!;
   }
 
   // Get transaction history
   Future<List<Transaction>> getTransactions() async {
+    await _loadTransactions();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
-    return _mockTransactions;
+    return _transactions;
   }
 
   // Purchase tokens
   Future<Transaction> purchaseTokens(int tokens, double amount) async {
+    await _loadTransactions();
+
     // Simulate network delay
     await Future.delayed(const Duration(seconds: 1));
 
     final newTransaction = Transaction(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      userId: 'user1',
+      userId: 'user_001',
       type: TransactionType.credit,
       tokens: tokens,
       amount: amount,
@@ -89,10 +91,10 @@ class WalletService {
     );
 
     // Update balance
-    _currentBalance += tokens;
+    _currentBalance = _currentBalance! + tokens;
 
     // Add to transactions
-    _mockTransactions.insert(0, newTransaction);
+    _transactions.insert(0, newTransaction);
 
     return newTransaction;
   }

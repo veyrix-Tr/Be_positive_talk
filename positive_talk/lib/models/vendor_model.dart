@@ -40,7 +40,8 @@ class Vendor {
       experienceHours: json['experienceHours'] as int,
       isOnline: json['isOnline'] as bool,
       verified: json['verified'] as bool,
-      ratePerMinute: json['ratePerMinute'] as int,
+      ratePerMinute: (json['ratePerMinute'] as num)
+          .toInt(), // Convert double to int
     );
   }
 

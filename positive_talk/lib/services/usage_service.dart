@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import '../models/usage_record_model.dart';
 
 class UsageService {
@@ -5,81 +7,76 @@ class UsageService {
   factory UsageService() => _instance;
   UsageService._internal();
 
-  // Mock usage records
-  final List<UsageRecord> _mockUsageRecords = [
-    UsageRecord(
-      id: '1',
-      userId: 'user1',
-      vendorId: '1',
-      vendorName: 'Aashna',
-      type: UsageType.call,
-      duration: const Duration(minutes: 15),
-      tokensUsed: 75,
-      date: DateTime.now().subtract(const Duration(days: 2)),
-    ),
-    UsageRecord(
-      id: '2',
-      userId: 'user1',
-      vendorId: '2',
-      vendorName: 'Priya',
-      type: UsageType.call,
-      duration: const Duration(minutes: 20),
-      tokensUsed: 80,
-      date: DateTime.now().subtract(const Duration(days: 1)),
-    ),
-    UsageRecord(
-      id: '3',
-      userId: 'user1',
-      vendorId: '3',
-      vendorName: 'Rajesh',
-      type: UsageType.call,
-      duration: const Duration(minutes: 5),
-      tokensUsed: 30,
-      date: DateTime.now().subtract(const Duration(hours: 3)),
-    ),
-    UsageRecord(
-      id: '4',
-      userId: 'user1',
-      vendorId: '1',
-      vendorName: 'Aashna',
-      type: UsageType.chat,
-      duration: const Duration(minutes: 8),
-      tokensUsed: 20,
-      date: DateTime.now().subtract(const Duration(hours: 5)),
-    ),
-    UsageRecord(
-      id: '5',
-      userId: 'user1',
-      vendorId: '2',
-      vendorName: 'Priya',
-      type: UsageType.chat,
-      duration: const Duration(minutes: 12),
-      tokensUsed: 30,
-      date: DateTime.now().subtract(const Duration(days: 3)),
-    ),
-  ];
+  List<UsageRecord> _usageRecords = [];
+
+  // Load usage records from JSON file
+  Future<void> _loadUsageRecords() async {
+    if (_usageRecords.isNotEmpty) return;
+
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/usage_records.json',
+      );
+      final Map<String, dynamic> data = json.decode(jsonString);
+      final List<dynamic> usageRecordsList = data['usageRecords'];
+
+      _usageRecords = usageRecordsList.map((json) {
+        // Convert JSON to match UsageRecord model
+        final usageRecordJson = {
+          'id': json['id'],
+          'userId': json['userId'],
+          'vendorId': json['vendorId'],
+          'vendorName': json['vendorName'],
+          'type': 'call', // Default to call type
+          'durationSeconds':
+              json['duration'] *
+              60, // Convert minutes to seconds for UsageRecord model
+          'tokensUsed': json['tokensUsed'],
+          'date': json['date'],
+        };
+        return UsageRecord.fromJson(usageRecordJson);
+      }).toList();
+    } catch (e) {
+      // Fallback to empty list if JSON loading fails
+      _usageRecords = [];
+    }
+  }
 
   // Get usage history
   Future<List<UsageRecord>> getUsageHistory() async {
+    await _loadUsageRecords();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
-    return _mockUsageRecords;
+    return _usageRecords;
   }
 
   // Get usage stats
   Future<Map<String, dynamic>> getUsageStats() async {
+    await _loadUsageRecords();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 400));
 
-    final totalTokensUsed = _mockUsageRecords.fold<int>(0, (sum, record) => sum + record.tokensUsed);
-    final totalCalls = _mockUsageRecords.where((r) => r.type == UsageType.call).length;
-    final totalChats = _mockUsageRecords.where((r) => r.type == UsageType.chat).length;
-    final totalDuration = _mockUsageRecords.fold<Duration>(Duration.zero, (sum, record) => sum + record.duration);
+    final totalTokensUsed = _usageRecords.fold<int>(
+      0,
+      (sum, record) => sum + record.tokensUsed,
+    );
+    final totalCalls = _usageRecords
+        .where((r) => r.type == UsageType.call)
+        .length;
+    final totalChats = _usageRecords
+        .where((r) => r.type == UsageType.chat)
+        .length;
+    final totalDuration = _usageRecords.fold<Duration>(
+      Duration.zero,
+      (sum, record) => sum + record.duration,
+    );
 
     // Get usage by vendor
     final vendorUsage = <String, Map<String, dynamic>>{};
-    for (final record in _mockUsageRecords) {
+    for (final record in _usageRecords) {
       if (!vendorUsage.containsKey(record.vendorId)) {
         vendorUsage[record.vendorId] = {
           'vendorName': record.vendorName,
@@ -101,12 +98,23 @@ class UsageService {
   }
 
   // Get usage by date range
-  Future<List<UsageRecord>> getUsageByDateRange(DateTime startDate, DateTime endDate) async {
+  Future<List<UsageRecord>> getUsageByDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) async {
+    await _loadUsageRecords();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
 
-    return _mockUsageRecords
-        .where((record) => record.date.isAfter(startDate.subtract(const Duration(days: 1))) && record.date.isBefore(endDate.add(const Duration(days: 1))))
+    return _usageRecords
+        .where(
+          (record) =>
+              record.date.isAfter(
+                startDate.subtract(const Duration(days: 1)),
+              ) &&
+              record.date.isBefore(endDate.add(const Duration(days: 1))),
+        )
         .toList();
   }
 }

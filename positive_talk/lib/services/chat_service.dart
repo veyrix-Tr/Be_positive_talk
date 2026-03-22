@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/services.dart';
 import '../models/message_model.dart';
 import '../models/inbox_chat_model.dart';
 
@@ -6,129 +8,137 @@ class ChatService {
   factory ChatService() => _instance;
   ChatService._internal();
 
-  // Mock message data
-  final Map<String, List<Message>> _mockMessages = {
-    '1': [
-      Message(
-        id: '1',
-        senderId: 'user1',
-        receiverId: '1',
-        text: 'Hello Aashna, I need some career advice.',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
-        isRead: true,
-      ),
-      Message(
-        id: '2',
-        senderId: '1',
-        receiverId: 'user1',
-        text:
-            'Hi! I\'d be happy to help. What specific area are you looking to get guidance on?',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 28)),
-        isRead: true,
-      ),
-      Message(
-        id: '3',
-        senderId: 'user1',
-        receiverId: '1',
-        text: 'I\'m considering a career change but feeling uncertain.',
-        timestamp: DateTime.now().subtract(const Duration(minutes: 25)),
-        isRead: false,
-      ),
-    ],
-    '2': [
-      Message(
-        id: '4',
-        senderId: 'user1',
-        receiverId: '2',
-        text:
-            'Hi Priya, I\'m interested in your relationship counseling services.',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: true,
-      ),
-      Message(
-        id: '5',
-        senderId: '2',
-        receiverId: 'user1',
-        text:
-            'Hello! Thank you for your interest. I\'d love to help you. When would you like to schedule our first session?',
-        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
-        isRead: true,
-      ),
-    ],
-    '3': [
-      Message(
-        id: '6',
-        senderId: 'user1',
-        receiverId: '3',
-        text: 'Rajesh, I need business strategy advice for my startup.',
-        timestamp: DateTime.now().subtract(const Duration(days: 1)),
-        isRead: true,
-      ),
-    ],
-  };
+  List<Message> _messages = [];
+  List<InboxChat> _inboxChats = [];
 
-  // Mock inbox chats data
-  final List<Map<String, dynamic>> _mockInboxChats = [
-    {
-      'id': 'chat1',
-      'vendorId': '1',
-      'vendorName': 'Aashna',
-      'vendorImage': 'assets/profile1.png',
-      'lastMessage': 'I\'m considering a career change but feeling uncertain.',
-      'lastMessageTime': DateTime.now().subtract(const Duration(minutes: 25)),
-      'unreadCount': 1,
-      'isOnline': true,
-    },
-    {
-      'id': 'chat2',
-      'vendorId': '2',
-      'vendorName': 'Priya',
-      'vendorImage': 'assets/profile2.png',
-      'lastMessage':
-          'Hello! Thank you for your interest. I\'d love to help you.',
-      'lastMessageTime': DateTime.now().subtract(const Duration(hours: 2)),
-      'unreadCount': 0,
-      'isOnline': true,
-    },
-    {
-      'id': 'chat3',
-      'vendorId': '3',
-      'vendorName': 'Rajesh',
-      'vendorImage': 'assets/profile3.png',
-      'lastMessage': 'Rajesh, I need business strategy advice for my startup.',
-      'lastMessageTime': DateTime.now().subtract(const Duration(days: 1)),
-      'unreadCount': 0,
-      'isOnline': false,
-    },
-  ];
+  // Load messages from JSON file
+  Future<void> _loadMessages() async {
+    if (_messages.isNotEmpty) return;
+
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/messages.json',
+      );
+      final Map<String, dynamic> data = json.decode(jsonString);
+      final List<dynamic> messagesList = data['messages'];
+
+      _messages = messagesList.map((json) => Message.fromJson(json)).toList();
+    } catch (e) {
+      // Fallback to empty list if JSON loading fails
+      _messages = [];
+    }
+  }
+
+  // Load inbox chats from JSON file
+  Future<void> _loadInboxChats() async {
+    if (_inboxChats.isNotEmpty) return;
+
+    try {
+      final String jsonString = await rootBundle.loadString(
+        'assets/data/messages.json',
+      );
+      final Map<String, dynamic> data = json.decode(jsonString);
+      final List<dynamic> messagesList = data['messages'];
+
+      // Create inbox chats from messages
+      final Map<String, InboxChat> chatMap = {};
+
+      for (var messageJson in messagesList) {
+        final message = Message.fromJson(messageJson);
+        final isFromUser = message.senderId.startsWith('user');
+        final vendorId = isFromUser ? message.receiverId : message.senderId;
+        final userId = isFromUser ? message.senderId : message.receiverId;
+
+        // Only process messages for current user (user_001)
+        if (userId == 'user_001') {
+          if (!chatMap.containsKey(vendorId)) {
+            chatMap[vendorId] = InboxChat(
+              id: 'chat_$vendorId',
+              vendorId: vendorId,
+              vendorName: _getVendorName(vendorId),
+              vendorImage: 'assets/profile1.png',
+              lastMessage: message.text,
+              lastMessageTime: message.timestamp,
+              unreadCount: !message.isRead && !isFromUser ? 1 : 0,
+              isOnline: _getVendorOnlineStatus(vendorId),
+            );
+          } else {
+            // Update last message and unread count
+            final chat = chatMap[vendorId]!;
+            chatMap[vendorId] = InboxChat(
+              id: chat.id,
+              vendorId: chat.vendorId,
+              vendorName: chat.vendorName,
+              vendorImage: chat.vendorImage,
+              lastMessage: message.text,
+              lastMessageTime: message.timestamp,
+              unreadCount:
+                  chat.unreadCount + (!message.isRead && !isFromUser ? 1 : 0),
+              isOnline: chat.isOnline,
+            );
+          }
+        }
+      }
+
+      _inboxChats = chatMap.values.toList()
+        ..sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
+    } catch (e) {
+      // Fallback to empty list if JSON loading fails
+      _inboxChats = [];
+    }
+  }
+
+  // Helper methods for vendor data (simplified for now)
+  String _getVendorName(String vendorId) {
+    final names = {
+      'vendor_001': 'Emma Thompson',
+      'vendor_002': 'David Martinez',
+      'vendor_003': 'Lisa Anderson',
+      'vendor_004': 'James Wilson',
+      'vendor_005': 'Sophie Turner',
+    };
+    return names[vendorId] ?? 'Unknown Vendor';
+  }
+
+  bool _getVendorOnlineStatus(String vendorId) {
+    final statuses = {
+      'vendor_001': true,
+      'vendor_002': true,
+      'vendor_003': false,
+      'vendor_004': true,
+      'vendor_005': false,
+    };
+    return statuses[vendorId] ?? false;
+  }
 
   // Get inbox chats
   Future<List<InboxChat>> getInboxChats() async {
+    await _loadInboxChats();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 600));
 
-    return _mockInboxChats
-        .map(
-          (chatData) => InboxChat(
-            id: chatData['id'] as String,
-            vendorId: chatData['vendorId'] as String,
-            vendorName: chatData['vendorName'] as String,
-            vendorImage: chatData['vendorImage'] as String,
-            lastMessage: chatData['lastMessage'] as String,
-            lastMessageTime: chatData['lastMessageTime'] as DateTime,
-            unreadCount: chatData['unreadCount'] as int,
-            isOnline: chatData['isOnline'] as bool,
-          ),
-        )
-        .toList();
+    return _inboxChats;
   }
 
   // Get messages for a specific vendor
   Future<List<Message>> getMessages(String vendorId) async {
+    await _loadMessages();
+
     // Simulate network delay
     await Future.delayed(const Duration(milliseconds: 500));
 
-    return _mockMessages[vendorId] ?? [];
+    // Filter messages for the specific vendor and current user
+    return _messages
+        .where(
+          (message) =>
+              (message.senderId == 'user_001' &&
+                  message.receiverId == vendorId) ||
+              (message.receiverId == 'user_001' &&
+                  message.senderId == vendorId),
+        )
+        .toList()
+      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
   }
 
   // Send a message
@@ -138,19 +148,15 @@ class ChatService {
 
     final newMessage = Message(
       id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: 'user1', // Mock current user ID
+      senderId: 'user_001', // Mock current user ID
       receiverId: vendorId,
       text: text,
       timestamp: DateTime.now(),
       isRead: false,
     );
 
-    // Add to mock messages
-    if (_mockMessages.containsKey(vendorId)) {
-      _mockMessages[vendorId]!.add(newMessage);
-    } else {
-      _mockMessages[vendorId] = [newMessage];
-    }
+    // Add to loaded messages
+    _messages.add(newMessage);
 
     return newMessage;
   }

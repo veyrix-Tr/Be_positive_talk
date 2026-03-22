@@ -1,0 +1,52 @@
+{
+  "messages": [
+    {
+      "id": "msg_001",
+      "senderId": "user_001",
+      "receiverId": "vendor_001",
+      "text": "Hi Emma! I've been feeling quite stressed lately with work. Do you have any availability this week?",
+      "timestamp": "2024-03-15T10:30:00Z",
+      "isRead": false
+    },
+    {
+      "id": "msg_002", 
+      "senderId": "vendor_001",
+      "receiverId": "user_001",
+      "text": "Hello! I understand work stress can be overwhelming. I'm available tomorrow at 2 PM if that works for you. We can discuss some stress management techniques.",
+      "timestamp": "2024-03-15T11:45:00Z",
+      "isRead": true
+    },
+    {
+      "id": "msg_003",
+      "senderId": "user_001", 
+      "receiverId": "vendor_002",
+      "text": "Hi David, I saw your profile about anxiety management. I've been dealing with panic attacks recently.",
+      "timestamp": "2024-03-14T15:20:00Z",
+      "isRead": false
+    },
+    {
+      "id": "msg_004",
+      "senderId": "vendor_002",
+      "receiverId": "user_001", 
+      "text": "I'm here to help. Panic attacks can be managed with the right techniques. Would you like to schedule a session to discuss coping strategies?",
+      "timestamp": "2024-03-14T16:30:00Z",
+      "isRead": true
+    },
+    {
+      "id": "msg_005",
+      "senderId": "user_001",
+      "receiverId": "vendor_003",
+      "text": "Hello Lisa! I'm interested in learning more about mindfulness meditation.",
+      "timestamp": "2024-03-13T09:15:00Z",
+      "isRead": true
+    },
+    {
+      "id": "msg_006",
+      "senderId": "vendor_003",
+      "receiverId": "user_001",
+      "text": "That's wonderful! Mindfulness can be life-changing. I have some great beginner techniques we can explore together.",
+      "timestamp": "2024-03-13T10:00:00Z",
+      "isRead": true
+    }
+  ]
+}

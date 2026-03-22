@@ -1,0 +1,74 @@
+{
+  "vendors": [
+    {
+      "id": "vendor_001",
+      "name": "Emma Thompson",
+      "gender": "female",
+      "age": 28,
+      "profileImage": "assets/profile1.png",
+      "rating": 4.8,
+      "totalReviews": 156,
+      "description": "Certified life coach with 5+ years of experience in relationship counseling and personal development.",
+      "experienceHours": 3200,
+      "isOnline": true,
+      "verified": true,
+      "ratePerMinute": 2.5
+    },
+    {
+      "id": "vendor_002",
+      "name": "David Martinez",
+      "gender": "male", 
+      "age": 35,
+      "profileImage": "assets/profile1.png",
+      "rating": 4.9,
+      "totalReviews": 203,
+      "description": "Professional therapist specializing in anxiety management and stress relief techniques.",
+      "experienceHours": 4500,
+      "isOnline": true,
+      "verified": true,
+      "ratePerMinute": 3.0
+    },
+    {
+      "id": "vendor_003",
+      "name": "Lisa Anderson",
+      "gender": "female",
+      "age": 31,
+      "profileImage": "assets/profile1.png",
+      "rating": 4.7,
+      "totalReviews": 89,
+      "description": "Wellness coach focused on mindfulness, meditation, and work-life balance.",
+      "experienceHours": 2100,
+      "isOnline": false,
+      "verified": true,
+      "ratePerMinute": 2.0
+    },
+    {
+      "id": "vendor_004",
+      "name": "James Wilson",
+      "gender": "male",
+      "age": 42,
+      "profileImage": "assets/profile1.png",
+      "rating": 4.6,
+      "totalReviews": 124,
+      "description": "Career coach and business mentor with expertise in professional development.",
+      "experienceHours": 3800,
+      "isOnline": true,
+      "verified": false,
+      "ratePerMinute": 2.8
+    },
+    {
+      "id": "vendor_005",
+      "name": "Sophie Turner",
+      "gender": "female",
+      "age": 26,
+      "profileImage": "assets/profile1.png",
+      "rating": 4.9,
+      "totalReviews": 267,
+      "description": "Relationship expert and communication coach helping couples and individuals.",
+      "experienceHours": 2900,
+      "isOnline": false,
+      "verified": true,
+      "ratePerMinute": 3.2
+    }
+  ]
+}
