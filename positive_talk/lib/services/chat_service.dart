@@ -1,94 +1,121 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import '../models/message_model.dart';
 import '../models/inbox_chat_model.dart';
+import '../core/api/api_client.dart';
+import 'user_service.dart';
 
 class ChatService {
   static final ChatService _instance = ChatService._internal();
   factory ChatService() => _instance;
   ChatService._internal();
 
-  List<Message> _messages = [];
-  List<InboxChat> _inboxChats = [];
-
-  // Load messages from JSON file
-  Future<void> _loadMessages() async {
-    if (_messages.isNotEmpty) return;
-
+  // Get inbox chats
+  Future<List<InboxChat>> getInboxChats() async {
     try {
-      final String jsonString = await rootBundle.loadString(
-        'assets/data/messages.json',
+      final apiClient = ApiClient();
+      final response = await apiClient.get('/user/profile', requireAuth: true);
+
+      final userData = apiClient.handleResponse(response);
+      final user = userData['user'];
+
+      // Get all messages to build inbox
+      final messagesResponse = await apiClient.get(
+        '/chat/history/${user['_id']}/all',
+        requireAuth: true,
       );
-      final Map<String, dynamic> data = json.decode(jsonString);
-      final List<dynamic> messagesList = data['messages'];
+      final messagesData = apiClient.handleListResponse(messagesResponse);
 
-      _messages = messagesList.map((json) => Message.fromJson(json)).toList();
-    } catch (e) {
-      // Fallback to empty list if JSON loading fails
-      _messages = [];
-    }
-  }
-
-  // Load inbox chats from JSON file
-  Future<void> _loadInboxChats() async {
-    if (_inboxChats.isNotEmpty) return;
-
-    try {
-      final String jsonString = await rootBundle.loadString(
-        'assets/data/messages.json',
-      );
-      final Map<String, dynamic> data = json.decode(jsonString);
-      final List<dynamic> messagesList = data['messages'];
-
-      // Create inbox chats from messages
+      // Build inbox chats from messages
       final Map<String, InboxChat> chatMap = {};
 
-      for (var messageJson in messagesList) {
+      for (var messageJson in messagesData) {
         final message = Message.fromJson(messageJson);
-        final isFromUser = message.senderId.startsWith('user');
+        final isFromUser = message.senderId == user['_id'];
         final vendorId = isFromUser ? message.receiverId : message.senderId;
-        final userId = isFromUser ? message.senderId : message.receiverId;
 
-        // Only process messages for current user (user_001)
-        if (userId == 'user_001') {
-          if (!chatMap.containsKey(vendorId)) {
-            chatMap[vendorId] = InboxChat(
-              id: 'chat_$vendorId',
-              vendorId: vendorId,
-              vendorName: _getVendorName(vendorId),
-              vendorImage: 'assets/profile1.png',
-              lastMessage: message.text,
-              lastMessageTime: message.timestamp,
-              unreadCount: !message.isRead && !isFromUser ? 1 : 0,
-              isOnline: _getVendorOnlineStatus(vendorId),
-            );
-          } else {
-            // Update last message and unread count
-            final chat = chatMap[vendorId]!;
-            chatMap[vendorId] = InboxChat(
-              id: chat.id,
-              vendorId: chat.vendorId,
-              vendorName: chat.vendorName,
-              vendorImage: chat.vendorImage,
-              lastMessage: message.text,
-              lastMessageTime: message.timestamp,
-              unreadCount:
-                  chat.unreadCount + (!message.isRead && !isFromUser ? 1 : 0),
-              isOnline: chat.isOnline,
-            );
-          }
+        if (!chatMap.containsKey(vendorId)) {
+          chatMap[vendorId] = InboxChat(
+            id: 'chat_$vendorId',
+            vendorId: vendorId,
+            vendorName: _getVendorName(vendorId),
+            vendorImage: 'assets/profile1.png',
+            lastMessage: message.text,
+            lastMessageTime: message.timestamp,
+            unreadCount: !message.isRead && !isFromUser ? 1 : 0,
+            isOnline: _getVendorOnlineStatus(vendorId),
+          );
+        } else {
+          // Update last message and unread count
+          final chat = chatMap[vendorId]!;
+          chatMap[vendorId] = InboxChat(
+            id: chat.id,
+            vendorId: chat.vendorId,
+            vendorName: chat.vendorName,
+            vendorImage: chat.vendorImage,
+            lastMessage: message.text,
+            lastMessageTime: message.timestamp,
+            unreadCount:
+                chat.unreadCount + (!message.isRead && !isFromUser ? 1 : 0),
+            isOnline: chat.isOnline,
+          );
         }
       }
 
-      _inboxChats = chatMap.values.toList()
+      return chatMap.values.toList()
         ..sort((a, b) => b.lastMessageTime.compareTo(a.lastMessageTime));
     } catch (e) {
-      // Fallback to empty list if JSON loading fails
-      _inboxChats = [];
+      throw Exception('Failed to load inbox chats: $e');
     }
   }
 
-  // Helper methods for vendor data (simplified for now)
+  // Get messages for a specific vendor
+  Future<List<Message>> getMessages(String vendorId) async {
+    try {
+      final apiClient = ApiClient();
+      final userService = UserService();
+      final user = await userService.getCurrentUser();
+
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await apiClient.get(
+        '/chat/history/${user.id}/$vendorId',
+        requireAuth: true,
+      );
+
+      final messagesData = apiClient.handleListResponse(response);
+      return messagesData.map((json) => Message.fromJson(json)).toList()
+        ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    } catch (e) {
+      throw Exception('Failed to load messages: $e');
+    }
+  }
+
+  // Send a message
+  Future<Message> sendMessage(String vendorId, String text) async {
+    try {
+      final apiClient = ApiClient();
+      final userService = UserService();
+      final user = await userService.getCurrentUser();
+
+      if (user == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await apiClient.post(
+        '/chat/send',
+        requireAuth: true,
+        body: {'receiverId': vendorId, 'text': text},
+      );
+
+      final messageData = apiClient.handleResponse(response);
+      return Message.fromJson(messageData);
+    } catch (e) {
+      throw Exception('Failed to send message: $e');
+    }
+  }
+
+  // Helper methods for vendor data (temporary until we have vendor API integration)
   String _getVendorName(String vendorId) {
     final names = {
       'vendor_001': 'Emma Thompson',
@@ -109,55 +136,5 @@ class ChatService {
       'vendor_005': false,
     };
     return statuses[vendorId] ?? false;
-  }
-
-  // Get inbox chats
-  Future<List<InboxChat>> getInboxChats() async {
-    await _loadInboxChats();
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 600));
-
-    return _inboxChats;
-  }
-
-  // Get messages for a specific vendor
-  Future<List<Message>> getMessages(String vendorId) async {
-    await _loadMessages();
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 500));
-
-    // Filter messages for the specific vendor and current user
-    return _messages
-        .where(
-          (message) =>
-              (message.senderId == 'user_001' &&
-                  message.receiverId == vendorId) ||
-              (message.receiverId == 'user_001' &&
-                  message.senderId == vendorId),
-        )
-        .toList()
-      ..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-  }
-
-  // Send a message
-  Future<Message> sendMessage(String vendorId, String text) async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    final newMessage = Message(
-      id: DateTime.now().millisecondsSinceEpoch.toString(),
-      senderId: 'user_001', // Mock current user ID
-      receiverId: vendorId,
-      text: text,
-      timestamp: DateTime.now(),
-      isRead: false,
-    );
-
-    // Add to loaded messages
-    _messages.add(newMessage);
-
-    return newMessage;
   }
 }

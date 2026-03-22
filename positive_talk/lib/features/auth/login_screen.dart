@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import '../../../shared/widgets/app_text_field.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
+import '../../../services/auth_service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -22,21 +23,35 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _sendOTP() {
+  void _sendOTP() async {
     if (_formKey.currentState!.validate()) {
       setState(() {
         _isLoading = true;
       });
 
-      // Simulate API call
-      Future.delayed(const Duration(seconds: 1), () {
+      try {
+        final authService = AuthService();
+        await authService.sendOTP(_phoneController.text);
+
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
           context.go('/otp');
         }
-      });
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to send OTP: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
 

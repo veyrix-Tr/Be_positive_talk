@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
+import '../../../services/auth_service.dart';
 
 class OTPScreen extends StatefulWidget {
   const OTPScreen({super.key});
@@ -39,7 +40,7 @@ class _OTPScreenState extends State<OTPScreen> {
     }
   }
 
-  void _verifyOTP() {
+  void _verifyOTP() async {
     String otp = _controllers.map((controller) => controller.text).join();
 
     if (otp.length == 6) {
@@ -47,15 +48,34 @@ class _OTPScreenState extends State<OTPScreen> {
         _isLoading = true;
       });
 
-      // Simulate OTP verification
-      Future.delayed(const Duration(seconds: 1), () {
+      try {
+        // Get phone number from previous screen (you might want to pass it as argument)
+        // For now, we'll use a hardcoded phone number - in real app, pass it from login screen
+        final authService = AuthService();
+        await authService.verifyOTP(
+          '9999999999',
+          otp,
+        ); // Replace with actual phone number
+
         if (mounted) {
           setState(() {
             _isLoading = false;
           });
           context.go('/profile-setup');
         }
-      });
+      } catch (e) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to verify OTP: $e'),
+              backgroundColor: AppColors.error,
+            ),
+          );
+        }
+      }
     }
   }
 

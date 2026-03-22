@@ -1,6 +1,5 @@
-import 'dart:convert';
-import 'package:flutter/services.dart';
 import '../models/user_model.dart';
+import '../core/api/api_client.dart';
 
 class UserService {
   static final UserService _instance = UserService._internal();
@@ -9,42 +8,20 @@ class UserService {
 
   User? _currentUser;
 
-  // Load user from JSON file
-  Future<void> _loadUser() async {
-    if (_currentUser != null) return;
+  // Get current user from API
+  Future<User?> getCurrentUser() async {
+    if (_currentUser != null) return _currentUser;
 
     try {
-      final String jsonString = await rootBundle.loadString(
-        'assets/data/users.json',
-      );
-      final Map<String, dynamic> data = json.decode(jsonString);
-      final List<dynamic> usersList = data['users'];
+      final apiClient = ApiClient();
+      final response = await apiClient.get('/user/profile', requireAuth: true);
 
-      // Get the first user as current user (for demo purposes)
-      final userJson = usersList.first;
-      _currentUser = User.fromJson(userJson);
+      final userData = apiClient.handleResponse(response);
+      _currentUser = User.fromJson(userData['user']!);
+      return _currentUser!;
     } catch (e) {
-      // Fallback to default user if JSON loading fails
-      _currentUser = User(
-        id: 'user_001',
-        name: 'Alex Johnson',
-        phoneNumber: '+1234567890',
-        profileImage: 'assets/profile1.png',
-        referralCode: 'ALEX123',
-        tokenBalance: 150,
-        createdAt: DateTime.now(),
-      );
+      throw Exception('Failed to load user profile: $e');
     }
-  }
-
-  // Get current user
-  Future<User> getCurrentUser() async {
-    await _loadUser();
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 300));
-
-    return _currentUser!;
   }
 
   // Update user profile
@@ -53,53 +30,84 @@ class UserService {
     String? phoneNumber,
     String? profileImage,
   }) async {
-    await _loadUser();
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.put(
+        '/user/profile',
+        requireAuth: true,
+        body: {
+          if (name != null) 'name': name,
+          if (phoneNumber != null) 'phoneNumber': phoneNumber,
+          if (profileImage != null) 'profileImage': profileImage,
+        },
+      );
 
-    // Simulate network delay
-    await Future.delayed(const Duration(seconds: 1));
-
-    _currentUser = User(
-      id: _currentUser!.id,
-      name: name ?? _currentUser!.name,
-      phoneNumber: phoneNumber ?? _currentUser!.phoneNumber,
-      profileImage: profileImage ?? _currentUser!.profileImage,
-      referralCode: _currentUser!.referralCode,
-      tokenBalance: _currentUser!.tokenBalance,
-      createdAt: _currentUser!.createdAt,
-    );
-
-    return _currentUser!;
+      final userData = apiClient.handleResponse(response);
+      _currentUser = User.fromJson(userData['user']!);
+      return _currentUser!;
+    } catch (e) {
+      throw Exception('Failed to update profile: $e');
+    }
   }
 
   // Get user by ID
   Future<User?> getUserById(String userId) async {
-    await _loadUser();
-
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 400));
-
-    // For now, only return current user if ID matches
-    if (_currentUser!.id == userId) {
-      return _currentUser;
+    try {
+      // For now, return current user if ID matches
+      final currentUser = await getCurrentUser();
+      if (currentUser != null && currentUser.id == userId) {
+        return currentUser;
+      }
+      return null;
+    } catch (e) {
+      throw Exception('Failed to load user: $e');
     }
-    return null;
   }
 
   // Update token balance
   Future<void> updateTokenBalance(int newBalance) async {
-    await _loadUser();
+    // This would typically be handled by the backend when transactions occur
+    // For now, we'll update the local user object
+    if (_currentUser != null) {
+      _currentUser = User(
+        id: _currentUser!.id,
+        name: _currentUser!.name,
+        phoneNumber: _currentUser!.phoneNumber,
+        profileImage: _currentUser!.profileImage,
+        referralCode: _currentUser!.referralCode,
+        tokenBalance: newBalance,
+        createdAt: _currentUser!.createdAt,
+      );
+    }
+  }
 
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 300));
+  // Get referral code
+  Future<String> getReferralCode() async {
+    try {
+      final apiClient = ApiClient();
+      final response = await apiClient.get(
+        '/user/referral-code',
+        requireAuth: true,
+      );
 
-    _currentUser = User(
-      id: _currentUser!.id,
-      name: _currentUser!.name,
-      phoneNumber: _currentUser!.phoneNumber,
-      profileImage: _currentUser!.profileImage,
-      referralCode: _currentUser!.referralCode,
-      tokenBalance: newBalance,
-      createdAt: _currentUser!.createdAt,
-    );
+      final data = apiClient.handleResponse(response);
+      return data['referralCode'] as String;
+    } catch (e) {
+      throw Exception('Failed to load referral code: $e');
+    }
+  }
+
+  // Save device token for notifications
+  Future<void> saveDeviceToken(String deviceToken) async {
+    try {
+      final apiClient = ApiClient();
+      await apiClient.post(
+        '/user/device-token',
+        requireAuth: true,
+        body: {'deviceToken': deviceToken},
+      );
+    } catch (e) {
+      throw Exception('Failed to save device token: $e');
+    }
   }
 }

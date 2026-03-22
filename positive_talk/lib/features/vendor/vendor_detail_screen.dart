@@ -5,29 +5,95 @@ import '../../../shared/widgets/online_indicator.dart';
 import '../../../core/theme/typography.dart';
 import '../../../core/theme/colors.dart';
 import '../../../models/vendor_model.dart';
+import '../../../services/vendor_service.dart';
 
-class VendorDetailScreen extends StatelessWidget {
+class VendorDetailScreen extends StatefulWidget {
   const VendorDetailScreen({super.key});
 
-  // Mock vendor data - in real app, this would come from route parameters
-  Vendor get _mockVendor => Vendor(
-    id: '1',
-    name: 'Aashna',
-    profileImage: 'assets/profile1.png',
-    ratePerMinute: 5,
-    isOnline: true,
-    gender: 'F',
-    age: 25,
-    rating: 4.82,
-    totalReviews: 3000,
-    description:
-        'Professional counselor with 5+ years experience in career guidance and personal development.',
-    experienceHours: 1000,
-    verified: true,
-  );
+  @override
+  State<VendorDetailScreen> createState() => _VendorDetailScreenState();
+}
+
+class _VendorDetailScreenState extends State<VendorDetailScreen> {
+  final VendorService _vendorService = VendorService();
+  Vendor? _vendor;
+  bool _isLoading = true;
+  String? _vendorId;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadVendor();
+  }
+
+  void _loadVendor() async {
+    // Get vendor ID from route parameters
+    final uri = GoRouterState.of(context).uri;
+    _vendorId = uri.pathSegments.last;
+    
+    setState(() => _isLoading = true);
+    
+    try {
+      final vendor = await _vendorService.getVendorById(_vendorId!);
+      if (mounted) {
+        setState(() {
+          _vendor = vendor;
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    if (_isLoading) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.background, AppColors.surface],
+            ),
+          ),
+          child: const Center(
+            child: CircularProgressIndicator(color: AppColors.primary),
+          ),
+        ),
+      );
+    }
+
+    if (_vendor == null) {
+      return Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topCenter,
+              end: Alignment.bottomCenter,
+              colors: [AppColors.background, AppColors.surface],
+            ),
+          ),
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.error_outline, color: AppColors.error, size: 48),
+                const SizedBox(height: 16),
+                Text(
+                  'Vendor not found',
+                  style: AppTypography.body1.copyWith(color: AppColors.error),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -76,12 +142,12 @@ class VendorDetailScreen extends StatelessWidget {
                               CircleAvatar(
                                 radius: 76,
                                 backgroundImage: AssetImage(
-                                  _mockVendor.profileImage,
+                                  _vendor!.profileImage,
                                 ),
                                 backgroundColor: AppColors.card,
                               ),
                               OnlineIndicator(
-                                isOnline: _mockVendor.isOnline,
+                                isOnline: _vendor!.isOnline,
                                 size: 16,
                               ),
                             ],
@@ -93,7 +159,7 @@ class VendorDetailScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                _mockVendor.name,
+                                _vendor!.name,
                                 style: AppTypography.headline1,
                               ),
                               const SizedBox(width: 8),
@@ -105,7 +171,7 @@ class VendorDetailScreen extends StatelessWidget {
 
                           // Gender and Age
                           Text(
-                            '${_mockVendor.gender} · ${_mockVendor.age} yrs',
+                            '${_vendor!.gender} · ${_vendor!.age} yrs',
                             style: AppTypography.body1.copyWith(
                               color: AppColors.textSecondary,
                             ),
@@ -120,18 +186,18 @@ class VendorDetailScreen extends StatelessWidget {
                               Icon(
                                 Icons.star_rounded,
                                 color: AppColors.warning,
-                                size: 20,
+                                size: 24,
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 8),
                               Text(
-                                _mockVendor.rating.toStringAsFixed(2),
-                                style: AppTypography.title1.copyWith(
-                                  fontWeight: FontWeight.w700,
+                                _vendor!.rating.toStringAsFixed(1),
+                                style: AppTypography.headline3.copyWith(
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
-                              const SizedBox(width: 4),
+                              const SizedBox(width: 8),
                               Text(
-                                '(${_mockVendor.totalReviews}+)',
+                                '(${_vendor!.totalReviews} reviews)',
                                 style: AppTypography.body2.copyWith(
                                   color: AppColors.textSecondary,
                                 ),
@@ -139,197 +205,122 @@ class VendorDetailScreen extends StatelessWidget {
                             ],
                           ),
 
-                          const SizedBox(height: 8),
+                          const SizedBox(height: 24),
 
-                          // Experience
-                          Text(
-                            '${_mockVendor.experienceHours}+ hrs',
-                            style: AppTypography.body1.copyWith(
-                              color: AppColors.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Middle Section - Description
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outline.withValues(alpha: 0.2),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'About',
-                              style: AppTypography.title3.copyWith(
-                                fontWeight: FontWeight.w600,
+                          // Description
+                          Container(
+                            padding: const EdgeInsets.all(16.0),
+                            decoration: BoxDecoration(
+                              color: AppColors.surface,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(
+                                color: AppColors.border.withValues(alpha: 0.3),
                               ),
                             ),
-                            const SizedBox(height: 12),
-                            Text(
-                              _mockVendor.description,
+                            child: Text(
+                              _vendor!.description,
                               style: AppTypography.body1.copyWith(
                                 color: AppColors.textSecondary,
                                 height: 1.5,
                               ),
+                              textAlign: TextAlign.center,
                             ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 32),
-
-                      // Bottom Section - Action Buttons
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(24),
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.outline.withValues(alpha: 0.2),
                           ),
-                        ),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Rate: ${_mockVendor.ratePerMinute} tokens/min',
-                              style: AppTypography.body1.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w600,
+
+                          const SizedBox(height: 24),
+
+                          // Experience and Rate
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Column(
+                                children: [
+                                  Icon(
+                                    Icons.schedule_rounded,
+                                    color: AppColors.primary,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '${_vendor!.experienceHours}h',
+                                    style: AppTypography.headline3.copyWith(
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Experience',
+                                    style: AppTypography.body2.copyWith(
+                                      color: AppColors.textSecondary,
+                                    ),
+                                  ),
+                                ],
                               ),
-                            ),
-                            const SizedBox(height: 16),
-                            Row(
-                              children: [
-                                Expanded(
-                                  child: Container(
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: AppColors.primaryGradient,
-                                      ),
-                                      borderRadius: BorderRadius.circular(28),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: () =>
-                                          context.go('/chat/${_mockVendor.id}'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        padding: EdgeInsets.zero,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            28,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.chat_outlined,
-                                            color: AppColors.textInverse,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'CHAT NOW',
-                                            style: AppTypography.buttonMedium
-                                                .copyWith(
-                                                  color: AppColors.textInverse,
-                                                  fontWeight: FontWeight.w700,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
+                              Column(
+                                children: [
+                                  Icon(
+                                    Icons.phone_rounded,
+                                    color: AppColors.primary,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '₹${_vendor!.ratePerMinute}',
+                                    style: AppTypography.headline3.copyWith(
+                                      color: AppColors.primary,
                                     ),
                                   ),
-                                ),
-                                const SizedBox(width: 16),
-                                Expanded(
-                                  child: Container(
-                                    height: 56,
-                                    decoration: BoxDecoration(
-                                      gradient: const LinearGradient(
-                                        colors: AppColors.primaryGradient,
-                                      ),
-                                      borderRadius: BorderRadius.circular(28),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: AppColors.primary.withValues(
-                                            alpha: 0.3,
-                                          ),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: ElevatedButton(
-                                      onPressed: () =>
-                                          context.go('/call/${_mockVendor.id}'),
-                                      style: ElevatedButton.styleFrom(
-                                        backgroundColor: Colors.transparent,
-                                        shadowColor: Colors.transparent,
-                                        padding: EdgeInsets.zero,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            28,
-                                          ),
-                                        ),
-                                      ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Icon(
-                                            Icons.call_outlined,
-                                            color: AppColors.textInverse,
-                                            size: 20,
-                                          ),
-                                          const SizedBox(width: 8),
-                                          Text(
-                                            'CALL NOW',
-                                            style: AppTypography.buttonMedium
-                                                .copyWith(
-                                                  color: AppColors.textInverse,
-                                                  fontWeight: FontWeight.w700,
-                                                  letterSpacing: 1.0,
-                                                ),
-                                          ),
-                                        ],
-                                      ),
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    'Per minute',
+                                    style: AppTypography.body2.copyWith(
+                                      color: AppColors.textSecondary,
                                     ),
                                   ),
+                                ],
+                              ),
+                            ],
+                          ),
+
+                          const SizedBox(height: 32),
+
+                          // Talk Now Button
+                          Container(
+                            width: double.infinity,
+                            height: 56,
+                            decoration: BoxDecoration(
+                              gradient: const LinearGradient(
+                                colors: AppColors.primaryGradient,
+                              ),
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withValues(alpha: 0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 4),
                                 ),
                               ],
                             ),
-                          ],
-                        ),
+                            child: ElevatedButton(
+                              onPressed: () => context.go('/chat/${_vendor!.id}'),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.transparent,
+                                shadowColor: Colors.transparent,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
+                              child: Text(
+                                'Talk Now',
+                                style: AppTypography.buttonLarge.copyWith(
+                                  color: AppColors.textInverse,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 32),
+                        ],
                       ),
                     ],
                   ),

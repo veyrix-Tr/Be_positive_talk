@@ -15,7 +15,7 @@ void main() {
     test('VendorService loads vendors from JSON', () async {
       final vendorService = VendorService();
       final vendors = await vendorService.getVerifiedVendors();
-      
+
       expect(vendors, isA<List>());
       // Allow for empty list in test environment, but check structure if not empty
       if (vendors.isNotEmpty) {
@@ -27,7 +27,7 @@ void main() {
     test('ChatService loads inbox chats from JSON', () async {
       final chatService = ChatService();
       final chats = await chatService.getInboxChats();
-      
+
       expect(chats, isA<List>());
       // Allow for empty list in test environment, but check structure if not empty
       if (chats.isNotEmpty) {
@@ -40,7 +40,7 @@ void main() {
       final walletService = WalletService();
       final balance = await walletService.getBalance();
       final transactions = await walletService.getTransactions();
-      
+
       expect(balance, isA<int>());
       expect(balance, greaterThanOrEqualTo(0));
       expect(transactions, isA<List>());
@@ -54,7 +54,7 @@ void main() {
     test('UsageService loads usage records from JSON', () async {
       final usageService = UsageService();
       final usageHistory = await usageService.getUsageHistory();
-      
+
       expect(usageHistory, isA<List>());
       // Allow for empty list in test environment, but check structure if not empty
       if (usageHistory.isNotEmpty) {
@@ -66,10 +66,12 @@ void main() {
     test('UserService loads user from JSON', () async {
       final userService = UserService();
       final user = await userService.getCurrentUser();
-      
-      expect(user.name, isA<String>());
-      expect(user.phoneNumber, isA<String>());
-      expect(user.tokenBalance, greaterThanOrEqualTo(0));
+
+      if (user != null) {
+        expect(user.name, isA<String>());
+        expect(user.phoneNumber, isA<String>());
+        expect(user.tokenBalance, greaterThanOrEqualTo(0));
+      }
     });
   });
 }
